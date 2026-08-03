@@ -1,0 +1,25 @@
+run:
+  timeout: 1m
+  modules-download-mode: readonly
+
+linters:
+  disable-all: true
+  enable:
+    - errcheck      # Проверяет, что ошибки не игнорируются
+    - gosimple      # Предлагает упростить Go-код
+    - govet         # Поисковик типичных багов Go
+    - ineffassign   # Находит бесполезные присвоения переменных
+    - staticcheck   # Мощный статический анализатор
+    - unused        # Находит неиспользуемый код/константы
+    - bodyclose     # Проверяет, что res.Body.Close() вызывается
+    - goconst       # Находит повторяющиеся строки и предлагает константы
+
+linters-settings:
+  govet:
+    shadow: true    # Предупреждает о затенении переменных
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
