@@ -1,0 +1,22 @@
+services:
+
+  db:
+    image: postgres:18
+    restart: always
+    environment:
+      POSTGRES_USER: hack
+      POSTGRES_PASSWORD: secretpass
+      POSTGRES_DB: hack_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/18/docker
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+
+volumes:
+  pgdata:
