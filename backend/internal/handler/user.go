@@ -10,6 +10,6 @@ type TokenGenerator interface {
 }
 
 type UserService interface {
-	RegisterUser(ctx context.Context, username string, password string) (error, *domain.User)
-	LoginUser(ctx context.Context, username string, password string) (error, *domain.User)
+	RegisterUser(ctx context.Context, username string, password string) (*domain.User, error)
+	LoginUser(ctx context.Context, username string, password string) (*domain.User, error)
 }

@@ -6,6 +6,7 @@ import (
 )
 
 type UserRepoProvider interface {
-	CreateUser(ctx context.Context, username string, password string) (error, *domain.User)
-	GetUserByID(ctx context.Context, id string) (error, *domain.User)
+	CreateUser(ctx context.Context, username string, password string) (*domain.User, error)
+	GetUserByUsername(ctx context.Context, username string) (*domain.User, error)
+	GetUserByID(ctx context.Context, id string) (*domain.User, error)
 }

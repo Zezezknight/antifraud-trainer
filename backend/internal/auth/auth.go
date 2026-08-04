@@ -20,6 +20,6 @@ func (t *TokenManager) GenerateToken(id string) (string, error) {
 	panic("implement me")
 }
 
-func (t *TokenManager) ValidateToken(tokenString string) (bool, error) {
+func (t *TokenManager) ValidateToken(tokenString string) (string, error) {
 	panic("implement me")
 }
