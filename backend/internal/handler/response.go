@@ -20,11 +20,11 @@ func writeError(w http.ResponseWriter, status int, code string, message string) 
 	w.Header().Set("Content-Type", "application/json")
 	err := dto.Error{Code: code, Message: message}
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(err)
+	_ = json.NewEncoder(w).Encode(err)
 }
 
 func writeResponse(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(data)
+	_ = json.NewEncoder(w).Encode(data)
 }
