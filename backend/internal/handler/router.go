@@ -1,6 +1,8 @@
 package handler
 
 import (
+	_ "embed"
+	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -8,13 +10,18 @@ import (
 	"github.com/go-chi/cors"
 )
 
+//go:embed docs/swagger.html
+var swaggerHTML []byte
+
+//go:embed docs/openapi.yaml
+var openAPISpec []byte
+
 func NewRouter(authHandler *AuthHandler) *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
-	router.Use(middleware.URLFormat)
 	router.Use(middleware.Timeout(60 * time.Second))
 
 	router.Use(cors.Handler(cors.Options{
@@ -25,6 +32,16 @@ func NewRouter(authHandler *AuthHandler) *chi.Mux {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
+
+	router.Get("/swagger", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write(swaggerHTML)
+	})
+
+	router.Get("/swagger/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/x-yaml")
+		w.Write(openAPISpec)
+	})
 
 	router.Route("/api", func(r chi.Router) {
 		r.Route("/auth", func(r chi.Router) {
