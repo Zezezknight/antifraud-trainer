@@ -3,6 +3,7 @@ package handler
 import (
 	"avito-antifraud-trainer/internal/dto"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 )
 
@@ -16,11 +17,13 @@ const (
 	MessageInternalError = "внутренняя ошибка сервера"
 )
 
-func writeError(w http.ResponseWriter, status int, code string, message string) {
+func writeError(w http.ResponseWriter, status int, code string, message string, err error) {
+	slog.Error(message, "error", err.Error())
+
 	w.Header().Set("Content-Type", "application/json")
-	err := dto.Error{Code: code, Message: message}
+	errResp := dto.Error{Code: code, Message: message}
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(err)
+	_ = json.NewEncoder(w).Encode(errResp)
 }
 
 func writeResponse(w http.ResponseWriter, status int, data interface{}) {

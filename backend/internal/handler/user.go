@@ -32,19 +32,19 @@ func NewAuthHandler(userService UserService, tokenGenerator TokenGenerator) *Aut
 func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var AuthReq dto.AuthRequest
 	if err := json.NewDecoder(r.Body).Decode(&AuthReq); err != nil {
-		writeError(w, http.StatusBadRequest, CodeInvalidJson, MessageInvalidJson)
+		writeError(w, http.StatusBadRequest, CodeInvalidJson, MessageInvalidJson, err)
 		return
 	}
 
 	user, err := h.userService.RegisterUser(r.Context(), AuthReq.Username, AuthReq.Password)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError)
+		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}
 
 	token, err := h.tokenGenerator.GenerateToken(user.ID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError)
+		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}
 
@@ -61,19 +61,19 @@ func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	var AuthReq dto.AuthRequest
 	if err := json.NewDecoder(r.Body).Decode(&AuthReq); err != nil {
-		writeError(w, http.StatusBadRequest, CodeInvalidJson, MessageInvalidJson)
+		writeError(w, http.StatusBadRequest, CodeInvalidJson, MessageInvalidJson, err)
 		return
 	}
 
 	user, err := h.userService.LoginUser(r.Context(), AuthReq.Username, AuthReq.Password)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError)
+		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}
 
 	token, err := h.tokenGenerator.GenerateToken(user.ID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError)
+		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}
 
