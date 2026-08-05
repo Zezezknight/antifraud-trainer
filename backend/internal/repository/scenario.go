@@ -111,6 +111,27 @@ func (r *ScenarioRepository) GetOptionsForNode(ctx context.Context, nodeID int) 
 	return options, nil
 }
 
+func (r *ScenarioRepository) GetOptionByID(ctx context.Context, optionID int) (*domain.ScenarioOption, error) {
+	const query = `
+		SELECT id, from_node_id, to_node_id, message_text, status
+		FROM scenario_options
+		WHERE id = $1
+	`
+
+	var option domain.ScenarioOption
+	err := r.DB.QueryRowContext(ctx, query, optionID).Scan(
+		&option.ID, &option.FromNodeID, &option.ToNodeID, &option.MessageText, &option.Status,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, domain.ErrScenarioOptionNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("get option by id: %w", err)
+	}
+
+	return &option, nil
+}
+
 func (r *ScenarioRepository) SaveScenarioResult(ctx context.Context, userID string, scenarioID int, score int, status domain.Status) error {
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
