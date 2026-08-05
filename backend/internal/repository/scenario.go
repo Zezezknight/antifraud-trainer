@@ -19,6 +19,11 @@ func (r *ScenarioRepository) GetScenarios(ctx context.Context, role string) ([]*
 	panic("implement me")
 }
 
+func (s *ScenarioRepository) GetScenarioByID(ctx context.Context, scenarioID int) (*domain.Scenario, error) {
+	// возвращает сценарий по его ID
+	panic("implement me")
+}
+
 func (r *ScenarioRepository) GetNodeByID(ctx context.Context, nodeID int) (*domain.ScenarioNode, error) {
 	// достает узел по его айди
 	panic("implement me")
@@ -31,6 +36,11 @@ func (r *ScenarioRepository) GetOptionsForNode(ctx context.Context, nodeID int) 
 
 func (r *ScenarioRepository) GetOptionByID(ctx context.Context, optionID int) (*domain.ScenarioOption, error) {
 	// получает следующий узел согласно выбранной опции
+	panic("implement me")
+}
+
+func (r *ScenarioRepository) GetScenarioResult(ctx context.Context, userID string, scenarioID int) (*domain.UserScenarioResult, error) {
+	// получает лучший результат пользователя для конкретного сценария
 	panic("implement me")
 }
 
