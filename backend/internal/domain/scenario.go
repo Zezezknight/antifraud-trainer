@@ -26,6 +26,7 @@ type Scenario struct {
 	Difficulty     Difficulty
 	RequiredPoints int
 	StartNodeID    int
+	IsAvailable    bool
 }
 
 type ScenarioNode struct {
