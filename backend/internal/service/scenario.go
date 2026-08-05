@@ -3,7 +3,6 @@ package service
 import (
 	"avito-antifraud-trainer/internal/domain"
 	"context"
-	"errors"
 	"fmt"
 )
 
@@ -14,7 +13,6 @@ type ScenarioRepoProvider interface {
 	GetOptionsForNode(ctx context.Context, nodeID int) ([]*domain.ScenarioOption, error)
 	GetOptionByID(ctx context.Context, optionID int) (*domain.ScenarioOption, error)
 	SaveScenarioResult(ctx context.Context, userID string, scenarioID int, score int, status domain.Status) error
-	GetScenarioResult(ctx context.Context, userID string, scenarioID int) (*domain.UserScenarioResult, error)
 	GetLeaderBoard(ctx context.Context, userID string) ([]*domain.LeaderboardEntry, error)
 }
 
@@ -122,17 +120,8 @@ func (s *ScenarioService) SaveScenarioResult(
 	score int,
 	status domain.Status,
 ) (domain.Status, error) {
-	existingResult, err := s.scenarioRepo.GetScenarioResult(ctx, userID, scenarioID)
-	if err != nil {
-		if !errors.Is(err, domain.ErrScenarioResultNotFound) {
-			return status, fmt.Errorf("scenarioRepo.GetScenarioResult: %w", err)
-		}
-	}
-
-	if existingResult == nil || score > existingResult.BestScore {
-		if err := s.scenarioRepo.SaveScenarioResult(ctx, userID, scenarioID, score, status); err != nil {
-			return status, fmt.Errorf("scenarioRepo.SaveScenarioResult: %w", err)
-		}
+	if err := s.scenarioRepo.SaveScenarioResult(ctx, userID, scenarioID, score, status); err != nil {
+		return status, fmt.Errorf("scenarioRepo.SaveScenarioResult: %w", err)
 	}
 
 	return status, nil
