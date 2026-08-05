@@ -11,4 +11,6 @@ var (
 	ErrInvalidAuthHeader      = errors.New("неверный формат заголовка авторизации")
 	ErrScenarioNodeNotFound   = errors.New("узел сценария не найден")
 	ErrScenarioOptionNotFound = errors.New("вариант ответа не найден")
+	ErrScenarioNotFound       = errors.New("сценарий не найден")
+	ErrScenarioResultNotFound = errors.New("результат сценария не найден")
 )

@@ -54,6 +54,34 @@ func (r *ScenarioRepository) GetScenarios(ctx context.Context, role string) ([]*
 	return scenarios, nil
 }
 
+func (r *ScenarioRepository) GetScenarioByID(ctx context.Context, scenarioID int) (*domain.Scenario, error) {
+	const query = `
+		SELECT id, title, description, role, difficulty, required_points, start_node_id
+		FROM scenarios
+		WHERE id = $1
+	`
+
+	var s domain.Scenario
+	var startNodeID sql.NullInt64
+
+	err := r.DB.QueryRowContext(ctx, query, scenarioID).Scan(
+		&s.ID, &s.Title, &s.Description, &s.Role, &s.Difficulty, &s.RequiredPoints, &startNodeID,
+	)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, domain.ErrScenarioNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("get scenario by id: %w", err)
+	}
+
+	if startNodeID.Valid {
+		s.StartNodeID = int(startNodeID.Int64)
+	}
+
+	return &s, nil
+}
+
 func (r *ScenarioRepository) GetNodeByID(ctx context.Context, nodeID int) (*domain.ScenarioNode, error) {
 	const query = `
 		SELECT id, scenario_id, message_text, is_final, final_status
@@ -132,8 +160,8 @@ func (r *ScenarioRepository) GetOptionByID(ctx context.Context, optionID int) (*
 	return &option, nil
 }
 
-func (r *ScenarioRepository) GetOptionByID(ctx context.Context, optionID int) (*domain.ScenarioOption, error) {
-	// получает следующий узел согласно выбранной опции
+func (r *ScenarioRepository) GetScenarioResult(ctx context.Context, userID string, scenarioID int) (*domain.UserScenarioResult, error) {
+	// получает лучший результат пользователя для конкретного сценария
 	panic("implement me")
 }
 
