@@ -10,11 +10,15 @@ import (
 const (
 	CodeInvalidJson   = "INVALID JSON"
 	CodeInternalError = "INTERNAL ERROR"
+	CodeUnauthorized  = "UNAUTHORIZED"
+	CodeBadRequest    = "BAD REQUEST"
 )
 
 const (
 	MessageInvalidJson   = "некорректный формат данных"
 	MessageInternalError = "внутренняя ошибка сервера"
+	MessageUnauthorized  = "отказано в доступе"
+	MessageInvalidID     = "некорректный ID"
 )
 
 func writeError(w http.ResponseWriter, status int, code string, message string, err error) {

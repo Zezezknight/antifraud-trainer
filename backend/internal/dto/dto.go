@@ -14,6 +14,22 @@ type User struct {
 	Username string `json:"username"`
 }
 
+type ScenarioCard struct {
+	ID             int    `json:"id"`
+	Title          string `json:"title"`
+	Difficulty     string `json:"difficulty"`
+	RequiredPoints int    `json:"required_points"`
+}
+
+type ScenarioFull struct {
+	ID             int    `json:"id"`
+	Title          string `json:"title"`
+	Description    string `json:"description"`
+	Role           string `json:"role"`
+	Difficulty     string `json:"difficulty"`
+	RequiredPoints int    `json:"required_points"`
+}
+
 type Error struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
