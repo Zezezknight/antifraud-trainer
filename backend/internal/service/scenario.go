@@ -36,6 +36,11 @@ func (s *ScenarioService) GetScenarioByID(ctx context.Context, scenarioID int) (
 	panic("implement me")
 }
 
+func (s *ScenarioService) GetNodeByID(ctx context.Context, nodeID int) (*domain.ScenarioNode, error) {
+	// возвращает узел по его ID
+	panic("implement me")
+}
+
 func (s *ScenarioService) ProcessStep(ctx context.Context, currentOptionID int) (*domain.ScenarioNode, error) {
 	// возвращает следующий узел по выбранной опции, если существует
 	panic("implement me")

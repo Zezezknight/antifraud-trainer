@@ -69,7 +69,235 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/scenarios:
+    get:
+      summary: Получить список доступных сценариев
+      tags:
+        - Scenarios
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: role
+          in: query
+          required: false
+          description: Фильтр по роли пользователя (например, buyer / seller)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список доступных сценариев
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Scenario'
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/scenarios/{id}:
+    get:
+      summary: Получить информацию о сценарии по ID
+      tags:
+        - Scenarios
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScenarioID'
+      responses:
+        '200':
+          description: Информация о сценарии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scenario'
+        '400':
+          description: Некорректный ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/scenarios/{id}/start:
+    get:
+      summary: Запустить сценарий (получить стартовый узел)
+      tags:
+        - Scenarios
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScenarioID'
+      responses:
+        '200':
+          description: Данные первого узла и варианты ответа
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StepResponse'
+        '400':
+          description: Некорректный ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/scenarios/{id}/step:
+    post:
+      summary: Совершить шаг в сценарии
+      tags:
+        - Scenarios
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScenarioID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StepRequest'
+      responses:
+        '200':
+          description: Данные следующего узла и варианты ответа
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StepResponse'
+        '400':
+          description: Некорректные данные запроса или JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/scenarios/{id}/finish:
+    post:
+      summary: Завершить сценарий и сохранить результат
+      tags:
+        - Scenarios
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScenarioID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResultRequest'
+      responses:
+        '204':
+          description: Результат успешно сохранен
+        '400':
+          description: Некорректные данные запроса или JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/leaderboard:
+    get:
+      summary: Получить таблицу лидеров
+      tags:
+        - Leaderboard
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Список пользователей в лидерборде
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntry'
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    ScenarioID:
+      name: id
+      in: path
+      required: true
+      description: Идентификатор сценария
+      schema:
+        type: integer
+
   schemas:
     AuthRequest:
       type: object
@@ -122,3 +350,124 @@ components:
         message:
           type: string
           example: "Invalid JSON format in request body"
+
+    Scenario:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - role
+        - difficulty
+        - required_points
+        - is_available
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        role:
+          type: string
+        difficulty:
+          type: string
+        required_points:
+          type: integer
+        is_available:
+          type: boolean
+
+    ScenarioNode:
+      type: object
+      required:
+        - id
+        - scenario_id
+        - message_text
+        - is_final
+        - final_status
+      properties:
+        id:
+          type: integer
+        scenario_id:
+          type: integer
+        message_text:
+          type: string
+        is_final:
+          type: boolean
+        final_status:
+          type: string
+
+    ScenarioOption:
+      type: object
+      required:
+        - id
+        - from_node_id
+        - to_node_id
+        - message_text
+        - status
+      properties:
+        id:
+          type: integer
+        from_node_id:
+          type: integer
+        to_node_id:
+          type: integer
+        message_text:
+          type: string
+        status:
+          type: string
+
+    StepRequest:
+      type: object
+      required:
+        - option_id
+      properties:
+        option_id:
+          type: integer
+
+    StepResponse:
+      type: object
+      required:
+        - scenario_node
+        - options
+      properties:
+        scenario_node:
+          $ref: '#/components/schemas/ScenarioNode'
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScenarioOption'
+
+    ResultRequest:
+      type: object
+      required:
+        - scenario_id
+        - score
+        - status
+      properties:
+        scenario_id:
+          type: integer
+        score:
+          type: integer
+        status:
+          type: string
+
+    LeaderboardEntry:
+      type: object
+      required:
+        - rank
+        - user_id
+        - username
+        - points
+        - status
+      properties:
+        rank:
+          type: integer
+        user_id:
+          type: string
+        username:
+          type: string
+        points:
+          type: integer
+        status:
+          type: string

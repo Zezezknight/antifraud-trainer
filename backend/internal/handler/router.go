@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"avito-antifraud-trainer/internal/middleware"
 	_ "embed"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	middle "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 )
 
@@ -16,13 +17,13 @@ var swaggerHTML []byte
 //go:embed docs/openapi.yaml
 var openAPISpec []byte
 
-func NewRouter(authHandler *AuthHandler) *chi.Mux {
+func NewRouter(authHandler *AuthHandler, scenarioHandler *ScenarioHandler, tv middleware.TokenValidator) *chi.Mux {
 	router := chi.NewRouter()
 
-	router.Use(middleware.RequestID)
-	router.Use(middleware.Logger)
-	router.Use(middleware.Recoverer)
-	router.Use(middleware.Timeout(60 * time.Second))
+	router.Use(middle.RequestID)
+	router.Use(middle.Logger)
+	router.Use(middle.Recoverer)
+	router.Use(middle.Timeout(60 * time.Second))
 
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
@@ -48,6 +49,19 @@ func NewRouter(authHandler *AuthHandler) *chi.Mux {
 			r.Post("/register", authHandler.RegisterUser)
 			r.Post("/login", authHandler.LoginUser)
 		})
+
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.AuthMiddleware(tv))
+
+			r.Get("/scenarios/{id}", scenarioHandler.GetScenarioByID)
+			r.Get("/scenarios", scenarioHandler.GetScenarios)
+			r.Get("/scenarios/{id}/start", scenarioHandler.StartScenario)
+			r.Post("/api/scenarios/{id}/step", scenarioHandler.ScenarioStep)
+			r.Post("/api/scenarios/{id}/finish", scenarioHandler.FinishScenario)
+			r.Get("/api/leaderboard", scenarioHandler.GetLeaderboard)
+		})
+
 	})
+
 	return router
 }
