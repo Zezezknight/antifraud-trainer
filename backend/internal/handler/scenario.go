@@ -127,13 +127,18 @@ func (h *ScenarioHandler) StartScenario(w http.ResponseWriter, r *http.Request) 
 		})
 	}
 
+	var finalStatus string
+	if startNode.FinalStatus != nil {
+		finalStatus = string(*startNode.FinalStatus)
+	}
+
 	stepResp := dto.StepResponse{
 		ScenarioNode: dto.ScenarioNode{
 			ID:          startNode.ID,
 			ScenarioID:  startNode.ScenarioID,
 			MessageText: startNode.MessageText,
 			IsFinal:     startNode.IsFinal,
-			FinalStatus: string(*startNode.FinalStatus),
+			FinalStatus: finalStatus,
 		},
 		Options: optionsResp,
 	}
@@ -177,13 +182,18 @@ func (h *ScenarioHandler) ScenarioStep(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+	var finalStatus string
+	if nextNode.FinalStatus != nil {
+		finalStatus = string(*nextNode.FinalStatus)
+	}
+
 	stepResp := dto.StepResponse{
 		ScenarioNode: dto.ScenarioNode{
 			ID:          nextNode.ID,
 			ScenarioID:  nextNode.ScenarioID,
 			MessageText: nextNode.MessageText,
 			IsFinal:     nextNode.IsFinal,
-			FinalStatus: string(*nextNode.FinalStatus),
+			FinalStatus: finalStatus,
 		},
 		Options: optionsResp,
 	}
@@ -197,13 +207,19 @@ func (h *ScenarioHandler) FinishScenario(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	scenarioID, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, CodeBadRequest, MessageInvalidID, err)
+		return
+	}
+
 	var result dto.ResultRequest
 	if err = json.NewDecoder(r.Body).Decode(&result); err != nil {
 		writeError(w, http.StatusBadRequest, CodeInvalidJson, MessageInvalidJson, err)
 		return
 	}
 
-	err = h.scenarioService.SaveScenarioResult(r.Context(), userID, result.ScenarioID, result.Score, domain.Status(result.Status))
+	err = h.scenarioService.SaveScenarioResult(r.Context(), userID, scenarioID, result.Score, domain.Status(result.Status))
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return

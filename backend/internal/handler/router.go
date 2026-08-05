@@ -56,9 +56,9 @@ func NewRouter(authHandler *AuthHandler, scenarioHandler *ScenarioHandler, tv mi
 			r.Get("/scenarios/{id}", scenarioHandler.GetScenarioByID)
 			r.Get("/scenarios", scenarioHandler.GetScenarios)
 			r.Get("/scenarios/{id}/start", scenarioHandler.StartScenario)
-			r.Post("/api/scenarios/{id}/step", scenarioHandler.ScenarioStep)
-			r.Post("/api/scenarios/{id}/finish", scenarioHandler.FinishScenario)
-			r.Get("/api/leaderboard", scenarioHandler.GetLeaderboard)
+			r.Post("/scenarios/{id}/step", scenarioHandler.ScenarioStep)
+			r.Post("/scenarios/{id}/finish", scenarioHandler.FinishScenario)
+			r.Get("/leaderboard", scenarioHandler.GetLeaderboard)
 		})
 
 	})

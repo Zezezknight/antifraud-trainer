@@ -42,11 +42,14 @@ func main() {
 
 	slog.Info("Создаю структуры...")
 	userRepo := repository.NewUserRepository(db)
+	scenarioRepo := repository.NewScenarioRepository(db)
 	userService := service.NewUserService(userRepo)
-	tokenManager := auth.NewTokenManager(time.Minute*10, conf.JWTSecret)
+	scenarioService := service.NewScenarioService(userRepo, scenarioRepo)
+	tokenManager := auth.NewTokenManager(24*time.Hour, conf.JWTSecret)
 
 	authHandler := handler.NewAuthHandler(userService, tokenManager)
-	router := handler.NewRouter(authHandler)
+	scenarioHandler := handler.NewScenarioHandler(scenarioService)
+	router := handler.NewRouter(authHandler, scenarioHandler, tokenManager)
 
 	srv := &http.Server{
 		Addr:    net.JoinHostPort(conf.Host, strconv.Itoa(conf.Port)),

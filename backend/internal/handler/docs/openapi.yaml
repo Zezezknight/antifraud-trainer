@@ -445,8 +445,6 @@ components:
         - score
         - status
       properties:
-        scenario_id:
-          type: integer
         score:
           type: integer
         status:

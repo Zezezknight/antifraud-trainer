@@ -79,6 +79,17 @@ func (s *ScenarioService) GetNodeByID(
 	return node, nil
 }
 
+func (s *ScenarioService) GetOptionByID(ctx context.Context, optionID int) (*domain.ScenarioOption, error) {
+	option, err := s.scenarioRepo.GetOptionByID(ctx, optionID)
+	if err != nil {
+		return nil, fmt.Errorf("scenarioRepo.GetOptionByID: %w", err)
+	}
+	if option == nil {
+		return nil, domain.ErrScenarioOptionNotFound
+	}
+	return option, nil
+}
+
 func (s *ScenarioService) ProcessStep(
 	ctx context.Context,
 	currentOptionID int,
@@ -119,10 +130,18 @@ func (s *ScenarioService) SaveScenarioResult(
 	scenarioID int,
 	score int,
 	status domain.Status,
-) (domain.Status, error) {
+) error {
 	if err := s.scenarioRepo.SaveScenarioResult(ctx, userID, scenarioID, score, status); err != nil {
-		return status, fmt.Errorf("scenarioRepo.SaveScenarioResult: %w", err)
+		return fmt.Errorf("scenarioRepo.SaveScenarioResult: %w", err)
 	}
 
-	return status, nil
+	return nil
+}
+
+func (s *ScenarioService) GetLeaderBoard(ctx context.Context, userID string) ([]*domain.LeaderboardEntry, error) {
+	leaderboard, err := s.scenarioRepo.GetLeaderBoard(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("scenarioRepo.GetLeaderBoard: %w", err)
+	}
+	return leaderboard, nil
 }

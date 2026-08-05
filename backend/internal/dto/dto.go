@@ -50,9 +50,8 @@ type StepRequest struct {
 }
 
 type ResultRequest struct {
-	ScenarioID int    `json:"scenario_id"`
-	Score      int    `json:"score"`
-	Status     string `json:"status"`
+	Score  int    `json:"score"`
+	Status string `json:"status"`
 }
 
 type LeaderboardEntry struct {
