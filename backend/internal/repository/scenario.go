@@ -29,6 +29,11 @@ func (r *ScenarioRepository) GetOptionsForNode(ctx context.Context, nodeID int) 
 	panic("implement me")
 }
 
+func (r *ScenarioRepository) GetOptionByID(ctx context.Context, optionID int) (*domain.ScenarioOption, error) {
+	// получает следующий узел согласно выбранной опции
+	panic("implement me")
+}
+
 func (r *ScenarioRepository) SaveScenarioResult(ctx context.Context, userID string, scenarioID int, score int, status domain.Status) error {
 	// сохраняет результат прохождения сценария
 	panic("implement me")

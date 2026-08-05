@@ -9,6 +9,7 @@ type ScenarioRepoProvider interface {
 	GetScenarios(ctx context.Context, role string) ([]*domain.Scenario, error)
 	GetNodeByID(ctx context.Context, nodeID int) (*domain.ScenarioNode, error)
 	GetOptionsForNode(ctx context.Context, nodeID int) ([]*domain.ScenarioOption, error)
+	GetOptionByID(ctx context.Context, optionID int) (*domain.ScenarioOption, error)
 	SaveScenarioResult(ctx context.Context, userID string, scenarioID int, score int, status domain.Status) error
 	GetLeaderBoard(ctx context.Context, userID string) ([]*domain.LeaderboardEntry, error)
 }
@@ -27,6 +28,11 @@ func NewScenarioService(repo UserRepoProvider, scenarioRepo ScenarioRepoProvider
 
 func (s *ScenarioService) GetAvailableScenarios(ctx context.Context, userID string, role string) ([]*domain.Scenario, error) {
 	// возвращает сценарии доступные пользователю в зависимости от его баллов
+	panic("implement me")
+}
+
+func (s *ScenarioService) GetScenarioByID(ctx context.Context, scenarioID int) (*domain.Scenario, error) {
+	// возвращает сценарий по его ID
 	panic("implement me")
 }
 
