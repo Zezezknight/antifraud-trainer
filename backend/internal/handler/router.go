@@ -20,6 +20,8 @@ var openAPISpec []byte
 func NewRouter(authHandler *AuthHandler, scenarioHandler *ScenarioHandler, tv middleware.TokenValidator) *chi.Mux {
 	router := chi.NewRouter()
 
+	router.Use(middle.Heartbeat("/api/ping"))
+
 	router.Use(middle.RequestID)
 	router.Use(middle.Logger)
 	router.Use(middle.Recoverer)
