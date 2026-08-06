@@ -8,20 +8,24 @@ import Home from './pages/Home';
 export const router = createBrowserRouter([
   {
     element: <App />,
-    errorElement: <NotFoundPage />,
     children: [
       {
+        // Защищенный сектор сайта (требуется авторизация пользователя)
         element: <ProtectedRoutes />,
         children: [
           {
-            index: true,
+            index: true, // Главная страница (/)
             element: <Home />,
           },
         ],
       },
       {
-        path: '/login',
+        path: '/login', // Страница входа в аккаунт
         element: <LoginPage />,
+      },
+      {
+        path: '*', // Несуществующие адреса (404)
+        element: <NotFoundPage />,
       },
     ],
   },
