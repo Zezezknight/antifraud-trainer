@@ -9,7 +9,7 @@ function NotFoundPage() {
         <img
           src={logo}
           alt="Avito-Antifraud Logo"
-          className="absolute top-8 left-8 w-3/4 sm:w-auto"
+          className="absolute top-8 left-8 sm:top-12 sm:left-12 w-3/4 sm:w-auto"
         />
         <div className="flex items-center justify-center h-full">
           <div className="flex flex-col gap-6">
