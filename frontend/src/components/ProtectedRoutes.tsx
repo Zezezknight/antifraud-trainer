@@ -3,12 +3,9 @@ import { Navigate, Outlet } from 'react-router';
 
 function ProtectedRoutes() {
   const user = useUser();
+  const isAuth = user === null;
 
-  if (user === null) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <Outlet />;
+  return isAuth ? <Outlet /> : <Navigate to="/login" replace />;
 }
 
 export default ProtectedRoutes;
