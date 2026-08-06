@@ -3,6 +3,7 @@ package handler
 import (
 	"avito-antifraud-trainer/internal/domain"
 	"avito-antifraud-trainer/internal/dto"
+	"avito-antifraud-trainer/internal/userctx"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -52,8 +53,12 @@ func (h *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	resp := dto.AuthResponse{
 		Token: token,
 		User: dto.User{
-			ID:       user.ID,
-			Username: user.Username,
+			ID:                     user.ID,
+			Username:               user.Username,
+			Points:                 user.Points,
+			Status:                 user.Status,
+			CompletedEasyScenarios: user.CompletedEasyScenarios,
+			CompletedHardScenarios: user.CompletedHardScenarios,
 		},
 	}
 	writeResponse(w, http.StatusOK, resp)
@@ -81,14 +86,37 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	resp := dto.AuthResponse{
 		Token: token,
 		User: dto.User{
-			ID:       user.ID,
-			Username: user.Username,
+			ID:                     user.ID,
+			Username:               user.Username,
+			Points:                 user.Points,
+			Status:                 user.Status,
+			CompletedEasyScenarios: user.CompletedEasyScenarios,
+			CompletedHardScenarios: user.CompletedHardScenarios,
 		},
 	}
 	writeResponse(w, http.StatusOK, resp)
 }
 
 func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
-	// возвращает пользователя по его ID
-	panic("implement me")
+	userID, err := userctx.GetUserID(r.Context())
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
+		return
+	}
+
+	user, err := h.userService.GetUserByID(r.Context(), userID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
+		return
+	}
+
+	userResp := dto.User{
+		ID:                     user.ID,
+		Username:               user.Username,
+		Points:                 user.Points,
+		Status:                 user.Status,
+		CompletedEasyScenarios: user.CompletedEasyScenarios,
+		CompletedHardScenarios: user.CompletedHardScenarios,
+	}
+	writeResponse(w, http.StatusOK, userResp)
 }
