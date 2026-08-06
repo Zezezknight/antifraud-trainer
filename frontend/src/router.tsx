@@ -4,10 +4,12 @@ import NotFoundPage from './pages/NotFoundPage';
 import LoginPage from './pages/LoginPage';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import Home from './pages/Home';
+import HydrateFallbackPage from './pages/HydrateFallbackPage';
 
 export const router = createBrowserRouter([
   {
     element: <App />,
+    hydrateFallbackElement: <HydrateFallbackPage />,
     children: [
       {
         // Защищенный сектор сайта (требуется авторизация пользователя)
