@@ -1,0 +1,36 @@
+# Зависимости
+node_modules
+.pnpm-store
+.yarn
+
+# Локальные сборки и кэш фреймворков
+dist
+build
+.next
+.nuxt
+.vite
+.cache
+coverage
+.eslintcache
+
+# Логи ошибок
+*debug.log*
+*error.log*
+
+# Конфиденциальные данные и переменные окружения
+.env
+.env.*
+!.env.example
+
+# Системные файлы операционных систем
+.DS_Store
+Thumbs.db
+
+# Настройки IDE и редакторов кода
+.idea
+.vscode
+*.suo
+*.ntvs
+*.njsproj
+*.sln
+*.swp

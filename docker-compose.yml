@@ -1,5 +1,4 @@
 services:
-
   db:
     image: postgres:18
     restart: always
@@ -8,11 +7,11 @@ services:
       POSTGRES_PASSWORD: secretpass
       POSTGRES_DB: hack_db
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/18/docker
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U hack -d hack_db" ]
+      test: ['CMD-SHELL', 'pg_isready -U hack -d hack_db']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -21,7 +20,7 @@ services:
     image: adminer
     restart: always
     ports:
-      - "8081:8080"
+      - '8081:8080'
 
   backend:
     build:
@@ -30,8 +29,15 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - '8080:8080'
 
+  frontend:
+    build:
+      context: ./frontend/
+    depends_on:
+      - backend
+    ports:
+      - '3000:80'
 
 volumes:
   pgdata:
