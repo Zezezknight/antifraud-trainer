@@ -1,14 +1,16 @@
 import { createBrowserRouter } from 'react-router';
-import App from './App';
-import NotFoundPage from './pages/NotFoundPage';
-import LoginPage from './pages/LoginPage';
+import Main from './layouts/Main';
+import NotFoundPage from './pages/NotFound';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import Home from './pages/Home';
-import HydrateFallbackPage from './pages/HydrateFallbackPage';
+import HydrateFallbackPage from './pages/HydrateFallback';
+import { LoginForm } from './components/LoginForm';
+import Auth from './layouts/Auth';
+import { RegisterForm } from './components/RegisterForm';
 
 export const router = createBrowserRouter([
   {
-    element: <App />,
+    element: <Main />, // Главный Layout
     hydrateFallbackElement: <HydrateFallbackPage />,
     children: [
       {
@@ -22,8 +24,17 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: '/login', // Страница входа в аккаунт
-        element: <LoginPage />,
+        element: <Auth />, // Layout Авторизации
+        children: [
+          {
+            path: '/login', // Страница входа в аккаунт
+            element: <LoginForm />,
+          },
+          {
+            path: '/register', // Страница регистрации аккаунта
+            element: <RegisterForm />,
+          },
+        ],
       },
       {
         path: '*', // Несуществующие адреса (404)
