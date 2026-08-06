@@ -1,12 +1,14 @@
-import { Outlet } from 'react-router';
+import { useUser } from '@/store/user';
+import { Navigate, Outlet } from 'react-router';
 
 function ProtectedRoutes() {
-  return (
-    <>
-      <h1>Protected</h1>
-      <Outlet />
-    </>
-  );
+  const user = useUser();
+
+  if (user === null) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
 }
 
 export default ProtectedRoutes;
