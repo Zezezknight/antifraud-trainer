@@ -49,13 +49,14 @@ func (h *ScenarioHandler) GetScenarios(w http.ResponseWriter, r *http.Request) {
 	scenariosResp := make([]dto.Scenario, 0, len(scenarios))
 	for _, scenario := range scenarios {
 		scenariosResp = append(scenariosResp, dto.Scenario{
-			ID:             scenario.ID,
-			Title:          scenario.Title,
-			Description:    scenario.Description,
-			Role:           role,
-			RequiredPoints: scenario.RequiredPoints,
-			Difficulty:     string(scenario.Difficulty),
-			IsAvailable:    scenario.IsAvailable,
+			ID:                         scenario.ID,
+			Title:                      scenario.Title,
+			Description:                scenario.Description,
+			Role:                       role,
+			RequiredScenariosThisLevel: scenario.RequiredScenariosThisLevel,
+			BestScore:                  scenario.BestScore,
+			Difficulty:                 string(scenario.Difficulty),
+			IsAvailable:                scenario.IsAvailable,
 		})
 	}
 
@@ -81,13 +82,14 @@ func (h *ScenarioHandler) GetScenarioByID(w http.ResponseWriter, r *http.Request
 	}
 
 	scenarioResp := dto.Scenario{
-		ID:             scenario.ID,
-		Title:          scenario.Title,
-		Description:    scenario.Description,
-		Role:           string(scenario.Role),
-		Difficulty:     string(scenario.Difficulty),
-		RequiredPoints: scenario.RequiredPoints,
-		IsAvailable:    scenario.IsAvailable,
+		ID:                         scenario.ID,
+		Title:                      scenario.Title,
+		Description:                scenario.Description,
+		Role:                       string(scenario.Role),
+		Difficulty:                 string(scenario.Difficulty),
+		BestScore:                  scenario.BestScore,
+		RequiredScenariosThisLevel: scenario.RequiredScenariosThisLevel,
+		IsAvailable:                scenario.IsAvailable,
 	}
 	writeResponse(w, http.StatusOK, scenarioResp)
 }
@@ -120,11 +122,13 @@ func (h *ScenarioHandler) StartScenario(w http.ResponseWriter, r *http.Request) 
 	optionsResp := make([]dto.ScenarioOption, 0, len(options))
 	for _, option := range options {
 		optionsResp = append(optionsResp, dto.ScenarioOption{
-			ID:          option.ID,
-			FromNodeID:  option.FromNodeID,
-			ToNodeID:    option.ToNodeID,
-			MessageText: option.MessageText,
-			Status:      string(option.Status),
+			ID:                   option.ID,
+			FromNodeID:           option.FromNodeID,
+			ToNodeID:             option.ToNodeID,
+			FeedbackText:         option.FeedbackText,
+			HowToRecognizeInLife: option.HowToRecognizeInLife,
+			MessageText:          option.MessageText,
+			Status:               string(option.Status),
 		})
 	}
 
@@ -175,11 +179,13 @@ func (h *ScenarioHandler) ScenarioStep(w http.ResponseWriter, r *http.Request) {
 	optionsResp := make([]dto.ScenarioOption, 0, len(options))
 	for _, option := range options {
 		optionsResp = append(optionsResp, dto.ScenarioOption{
-			ID:          option.ID,
-			FromNodeID:  option.FromNodeID,
-			ToNodeID:    option.ToNodeID,
-			MessageText: option.MessageText,
-			Status:      string(option.Status),
+			ID:                   option.ID,
+			FromNodeID:           option.FromNodeID,
+			ToNodeID:             option.ToNodeID,
+			FeedbackText:         option.FeedbackText,
+			HowToRecognizeInLife: option.HowToRecognizeInLife,
+			MessageText:          option.MessageText,
+			Status:               string(option.Status),
 		})
 	}
 
@@ -214,13 +220,19 @@ func (h *ScenarioHandler) FinishScenario(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	scenario, err := h.scenarioService.GetScenarioByID(r.Context(), scenarioID)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, CodeBadRequest, MessageInvalidID, err)
+		return
+	}
+
 	var result dto.ResultRequest
 	if err = json.NewDecoder(r.Body).Decode(&result); err != nil {
 		writeError(w, http.StatusBadRequest, CodeInvalidJson, MessageInvalidJson, err)
 		return
 	}
 
-	err = h.scenarioService.SaveScenarioResult(r.Context(), userID, scenarioID, result.Score, domain.Status(result.Status))
+	err = h.scenarioService.SaveScenarioResult(r.Context(), userID, scenarioID, result.Score, result.Status, string(scenario.Difficulty))
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return

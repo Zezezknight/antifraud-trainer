@@ -69,6 +69,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/users/me:
+    get:
+      summary: Получить данные о текущем пользователе
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Информация о пользователе
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
   /api/scenarios:
     get:
       summary: Получить список доступных сценариев
@@ -330,6 +360,10 @@ components:
       required:
         - user_id
         - username
+        - points
+        - status
+        - completed_easy_scenarios
+        - completed_hard_scenarios
       properties:
         user_id:
           type: string
@@ -337,6 +371,18 @@ components:
         username:
           type: string
           example: "johndoe"
+        points:
+          type: integer
+          example: 100
+        status:
+          type: string
+          example: "Новичок"
+        completed_easy_scenarios:
+          type: integer
+          example: 1
+        completed_hard_scenarios:
+          type: integer
+          example: 1
 
     ErrorResponse:
       type: object
@@ -358,8 +404,9 @@ components:
         - title
         - description
         - role
+        - best_score
+        - required_scenarios_this_level
         - difficulty
-        - required_points
         - is_available
       properties:
         id:
@@ -372,10 +419,12 @@ components:
           type: string
         difficulty:
           type: string
-        required_points:
+        required_scenarios_this_level:
           type: integer
         is_available:
           type: boolean
+        best_score:
+          type: integer
 
     ScenarioNode:
       type: object
@@ -403,6 +452,8 @@ components:
         - id
         - from_node_id
         - to_node_id
+        - how_to_recognize_in_life
+        - feedback_text
         - message_text
         - status
       properties:
@@ -413,6 +464,10 @@ components:
         to_node_id:
           type: integer
         message_text:
+          type: string
+        feedback_text:
+          type: string
+        how_to_recognize_in_life:
           type: string
         status:
           type: string
@@ -441,7 +496,6 @@ components:
     ResultRequest:
       type: object
       required:
-        - scenario_id
         - score
         - status
       properties:
