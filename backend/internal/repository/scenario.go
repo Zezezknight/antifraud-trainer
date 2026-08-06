@@ -164,14 +164,20 @@ func (r *ScenarioRepository) GetOptionByID(ctx context.Context, optionID int) (*
 
 func (r *ScenarioRepository) GetScenarioResult(ctx context.Context, userID string, scenarioID int) (*domain.UserScenarioResult, error) {
 	const query = `
-		SELECT user_id, scenario_id, score, difficulty, status
-		FROM user_scenario_results
-		WHERE user_id = $1 AND scenario_id = $2
-	`
+       SELECT user_id, scenario_id, score, difficulty, status
+       FROM user_scenario_results
+       WHERE user_id = $1 AND scenario_id = $2
+       ORDER BY score DESC
+       LIMIT 1
+    `
 
 	var result domain.UserScenarioResult
 	err := r.DB.QueryRowContext(ctx, query, userID, scenarioID).Scan(
-		&result.UserID, &result.ScenarioID, &result.Score, &result.Difficulty, &result.Status,
+		&result.UserID,
+		&result.ScenarioID,
+		&result.Score,
+		&result.Difficulty,
+		&result.Status,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -191,39 +197,39 @@ func (r *ScenarioRepository) SaveScenarioResult(ctx context.Context, userID stri
 	defer tx.Rollback()
 
 	const upsertQuery = `
-		INSERT INTO user_scenario_results (user_id, scenario_id, score, difficulty, status, completed_at)
-		VALUES ($1, $2, $3, $4, $5, NOW())
-		ON CONFLICT (user_id, scenario_id) DO UPDATE
-		SET score        = EXCLUDED.score,
-		    difficulty   = EXCLUDED.difficulty,
-		    status       = EXCLUDED.status,
-		    completed_at = EXCLUDED.completed_at
-		WHERE user_scenario_results.score < EXCLUDED.score
-	`
+       INSERT INTO user_scenario_results (user_id, scenario_id, score, difficulty, status, completed_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())
+       ON CONFLICT (user_id, scenario_id) DO UPDATE
+       SET score        = EXCLUDED.score,
+           difficulty   = EXCLUDED.difficulty,
+           status       = EXCLUDED.status,
+           completed_at = EXCLUDED.completed_at
+       WHERE user_scenario_results.score < EXCLUDED.score
+    `
 
 	if _, err := tx.ExecContext(ctx, upsertQuery, userID, scenarioID, score, difficulty, status); err != nil {
 		return fmt.Errorf("save scenario result: %w", err)
 	}
 
 	const recalcStatsQuery = `
-		UPDATE users
-		SET points = (
-			SELECT COALESCE(SUM(score), 0)
-			FROM user_scenario_results
-			WHERE user_id = $1
-		),
-		completed_easy_scenarios = (
-			SELECT COUNT(*)
-			FROM user_scenario_results
-			WHERE user_id = $1 AND status = $2 AND difficulty = $3
-		),
-		completed_hard_scenarios = (
-			SELECT COUNT(*)
-			FROM user_scenario_results
-			WHERE user_id = $1 AND status = $2 AND difficulty = $4
-		)
-		WHERE id = $1
-	`
+       UPDATE users
+       SET points = (
+          SELECT COALESCE(SUM(score), 0)
+          FROM user_scenario_results
+          WHERE user_id = $1
+       ),
+       completed_easy_scenarios = (
+          SELECT COUNT(DISTINCT scenario_id)
+          FROM user_scenario_results
+          WHERE user_id = $1 AND status = $2 AND difficulty = $3
+       ),
+       completed_hard_scenarios = (
+          SELECT COUNT(DISTINCT scenario_id)
+          FROM user_scenario_results
+          WHERE user_id = $1 AND status = $2 AND difficulty = $4
+       )
+       WHERE id = $1
+    `
 
 	if _, err := tx.ExecContext(
 		ctx, recalcStatsQuery, userID,
