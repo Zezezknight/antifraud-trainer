@@ -29,14 +29,12 @@ func NewScenarioService(repo UserRepoProvider, scenarioRepo ScenarioRepoProvider
 	}
 }
 
-// обновить логику доступности сценария в зависимости от кол-ва пройденных сценариев такого же уровня
-// добавить расчет лучшего скора (в этом поможет метод GetScenarioResult)
 func (s *ScenarioService) GetAvailableScenarios(
 	ctx context.Context,
 	userID string,
 	role string,
 ) ([]*domain.Scenario, error) {
-	user, err := s.userRepo.GetUserByID(ctx, userID)
+	_, err := s.userRepo.GetUserByID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("userRepo.GetUserByID: %w", err)
 	}
@@ -46,9 +44,25 @@ func (s *ScenarioService) GetAvailableScenarios(
 		return nil, fmt.Errorf("scenarioRepo.GetScenarios: %w", err)
 	}
 
+	completedByDifficulty := make(map[domain.Difficulty]int)
 	for _, sc := range scenarios {
-		available := user.Points >= sc.RequiredPoints
-		sc.IsAvailable = available
+		result, err := s.scenarioRepo.GetScenarioResult(ctx, userID, sc.ID)
+		if err != nil {
+			return nil, fmt.Errorf("scenarioRepo.GetScenarioResult: %w", err)
+		}
+
+		if result != nil {
+			bestScore := result.Score
+			sc.BestScore = &bestScore
+
+			if result.Status == domain.StatusGreen {
+				completedByDifficulty[sc.Difficulty]++
+			}
+		}
+	}
+
+	for _, sc := range scenarios {
+		sc.IsAvailable = completedByDifficulty[sc.Difficulty] >= sc.RequiredScenariosThisLevel
 	}
 
 	return scenarios, nil
@@ -127,10 +141,6 @@ func (s *ScenarioService) GetOptionsForNode(
 	return options, nil
 }
 
-// добавить обновление статуса пользователя в зависимости от текущих очков после сохранения результата
-// >= 100 очков "Бдительный"
-// >= 200 очков "Внимательный"
-// >= 300 очков "Эксперт безопасности"
 func (s *ScenarioService) SaveScenarioResult(
 	ctx context.Context,
 	userID string,
@@ -143,12 +153,42 @@ func (s *ScenarioService) SaveScenarioResult(
 		return fmt.Errorf("scenarioRepo.SaveScenarioResult: %w", err)
 	}
 
+	user, err := s.userRepo.GetUserByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("userRepo.GetUserByID: %w", err)
+	}
+
+	var newStatus string
+	switch {
+	case user.Points >= 300:
+		newStatus = "Эксперт безопасности"
+	case user.Points >= 200:
+		newStatus = "Внимательный"
+	case user.Points >= 100:
+		newStatus = "Бдительный"
+	default:
+		newStatus = ""
+	}
+
+	if user.Status != newStatus {
+		if err := s.userRepo.UpdateUserStatus(ctx, userID, newStatus); err != nil {
+			return fmt.Errorf("userRepo.UpdateUserStatus: %w", err)
+		}
+	}
+
 	return nil
 }
 
-func (s *ScenarioService) GetScenarioResult(ctx context.Context, userID string, scenarioID int) (*domain.UserScenarioResult, error) {
-	// возвращает результат пользователя в нужном сценарии
-	panic("implement me")
+func (s *ScenarioService) GetScenarioResult(
+	ctx context.Context,
+	userID string,
+	scenarioID int,
+) (*domain.UserScenarioResult, error) {
+	result, err := s.scenarioRepo.GetScenarioResult(ctx, userID, scenarioID)
+	if err != nil {
+		return nil, fmt.Errorf("scenarioRepo.GetScenarioResult: %w", err)
+	}
+	return result, nil
 }
 
 func (s *ScenarioService) GetLeaderBoard(ctx context.Context, userID string) ([]*domain.LeaderboardEntry, error) {

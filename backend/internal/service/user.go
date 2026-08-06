@@ -69,6 +69,12 @@ func (s *UserService) LoginUser(ctx context.Context, username string, password s
 }
 
 func (s *UserService) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
-	// возвращает пользователя по его ID
-	panic("implement me")
+	user, err := s.repo.GetUserByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("repo.GetUserByID: %w", err)
+	}
+	if user == nil {
+		return nil, domain.ErrUserNotFound
+	}
+	return user, nil
 }
