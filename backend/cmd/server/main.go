@@ -47,9 +47,9 @@ func main() {
 	scenarioService := service.NewScenarioService(userRepo, scenarioRepo)
 	tokenManager := auth.NewTokenManager(24*time.Hour, conf.JWTSecret)
 
-	authHandler := handler.NewAuthHandler(userService, tokenManager)
+	userHandler := handler.NewUserHandler(userService, tokenManager)
 	scenarioHandler := handler.NewScenarioHandler(scenarioService)
-	router := handler.NewRouter(authHandler, scenarioHandler, tokenManager)
+	router := handler.NewRouter(userHandler, scenarioHandler, tokenManager)
 
 	srv := &http.Server{
 		Addr:    net.JoinHostPort(conf.Host, strconv.Itoa(conf.Port)),

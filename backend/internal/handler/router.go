@@ -17,7 +17,7 @@ var swaggerHTML []byte
 //go:embed docs/openapi.yaml
 var openAPISpec []byte
 
-func NewRouter(authHandler *AuthHandler, scenarioHandler *ScenarioHandler, tv middleware.TokenValidator) *chi.Mux {
+func NewRouter(userHandler *UserHandler, scenarioHandler *ScenarioHandler, tv middleware.TokenValidator) *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(middle.Heartbeat("/api/ping"))
@@ -48,13 +48,14 @@ func NewRouter(authHandler *AuthHandler, scenarioHandler *ScenarioHandler, tv mi
 
 	router.Route("/api", func(r chi.Router) {
 		r.Route("/auth", func(r chi.Router) {
-			r.Post("/register", authHandler.RegisterUser)
-			r.Post("/login", authHandler.LoginUser)
+			r.Post("/register", userHandler.RegisterUser)
+			r.Post("/login", userHandler.LoginUser)
 		})
 
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.AuthMiddleware(tv))
 
+			r.Get("/users/me", userHandler.GetUserByID)
 			r.Get("/scenarios/{id}", scenarioHandler.GetScenarioByID)
 			r.Get("/scenarios", scenarioHandler.GetScenarios)
 			r.Get("/scenarios/{id}/start", scenarioHandler.StartScenario)

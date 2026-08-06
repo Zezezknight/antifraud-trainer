@@ -6,7 +6,7 @@ type Scenario struct {
 	Description                string `json:"description"`
 	Role                       string `json:"role"`
 	Difficulty                 string `json:"difficulty"`
-	BestScore                  int    `json:"best_score"`
+	BestScore                  *int   `json:"best_score"`
 	RequiredScenariosThisLevel int    `json:"required_scenarios_this_level"`
 	IsAvailable                bool   `json:"is_available"`
 }
