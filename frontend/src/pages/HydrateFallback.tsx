@@ -1,5 +1,5 @@
 import { Spinner } from '@/components/ui/spinner';
-import '../style.css';
+import '@/style.css';
 
 function HydrateFallbackPage() {
   return (
