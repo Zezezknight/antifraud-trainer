@@ -18,7 +18,7 @@ func NewScenarioRepository(db *sql.DB) *ScenarioRepository {
 
 func (r *ScenarioRepository) GetScenarios(ctx context.Context, role string) ([]*domain.Scenario, error) {
 	const query = `
-		SELECT id, title, description, role, difficulty, required_points, start_node_id
+		SELECT id, title, description, role, difficulty, required_scenarios_this_level, start_node_id
 		FROM scenarios
 		WHERE role = $1
 		ORDER BY id
@@ -36,7 +36,7 @@ func (r *ScenarioRepository) GetScenarios(ctx context.Context, role string) ([]*
 		var startNodeID sql.NullInt64
 
 		if err := rows.Scan(
-			&s.ID, &s.Title, &s.Description, &s.Role, &s.Difficulty, &s.RequiredPoints, &startNodeID,
+			&s.ID, &s.Title, &s.Description, &s.Role, &s.Difficulty, &s.RequiredScenariosThisLevel, &startNodeID,
 		); err != nil {
 			return nil, fmt.Errorf("scan scenario: %w", err)
 		}
@@ -56,7 +56,7 @@ func (r *ScenarioRepository) GetScenarios(ctx context.Context, role string) ([]*
 
 func (r *ScenarioRepository) GetScenarioByID(ctx context.Context, scenarioID int) (*domain.Scenario, error) {
 	const query = `
-		SELECT id, title, description, role, difficulty, required_points, start_node_id
+		SELECT id, title, description, role, difficulty, required_scenarios_this_level, start_node_id
 		FROM scenarios
 		WHERE id = $1
 	`
@@ -65,7 +65,7 @@ func (r *ScenarioRepository) GetScenarioByID(ctx context.Context, scenarioID int
 	var startNodeID sql.NullInt64
 
 	err := r.DB.QueryRowContext(ctx, query, scenarioID).Scan(
-		&s.ID, &s.Title, &s.Description, &s.Role, &s.Difficulty, &s.RequiredPoints, &startNodeID,
+		&s.ID, &s.Title, &s.Description, &s.Role, &s.Difficulty, &s.RequiredScenariosThisLevel, &startNodeID,
 	)
 
 	if errors.Is(err, sql.ErrNoRows) {
@@ -112,7 +112,7 @@ func (r *ScenarioRepository) GetNodeByID(ctx context.Context, nodeID int) (*doma
 
 func (r *ScenarioRepository) GetOptionsForNode(ctx context.Context, nodeID int) ([]*domain.ScenarioOption, error) {
 	const query = `
-		SELECT id, from_node_id, to_node_id, message_text, status
+		SELECT id, from_node_id, to_node_id, message_text, feedback_text, how_to_recognize_in_life, status
 		FROM scenario_options
 		WHERE from_node_id = $1
 		ORDER BY id
@@ -127,7 +127,9 @@ func (r *ScenarioRepository) GetOptionsForNode(ctx context.Context, nodeID int) 
 	var options []*domain.ScenarioOption
 	for rows.Next() {
 		var o domain.ScenarioOption
-		if err := rows.Scan(&o.ID, &o.FromNodeID, &o.ToNodeID, &o.MessageText, &o.Status); err != nil {
+		if err := rows.Scan(
+			&o.ID, &o.FromNodeID, &o.ToNodeID, &o.MessageText, &o.FeedbackText, &o.HowToRecognizeInLife, &o.Status,
+		); err != nil {
 			return nil, fmt.Errorf("scan scenario option: %w", err)
 		}
 		options = append(options, &o)
@@ -141,14 +143,14 @@ func (r *ScenarioRepository) GetOptionsForNode(ctx context.Context, nodeID int) 
 
 func (r *ScenarioRepository) GetOptionByID(ctx context.Context, optionID int) (*domain.ScenarioOption, error) {
 	const query = `
-		SELECT id, from_node_id, to_node_id, message_text, status
+		SELECT id, from_node_id, to_node_id, message_text, feedback_text, how_to_recognize_in_life, status
 		FROM scenario_options
 		WHERE id = $1
 	`
 
 	var option domain.ScenarioOption
 	err := r.DB.QueryRowContext(ctx, query, optionID).Scan(
-		&option.ID, &option.FromNodeID, &option.ToNodeID, &option.MessageText, &option.Status,
+		&option.ID, &option.FromNodeID, &option.ToNodeID, &option.MessageText, &option.FeedbackText, &option.HowToRecognizeInLife, &option.Status,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, domain.ErrScenarioOptionNotFound
@@ -161,12 +163,26 @@ func (r *ScenarioRepository) GetOptionByID(ctx context.Context, optionID int) (*
 }
 
 func (r *ScenarioRepository) GetScenarioResult(ctx context.Context, userID string, scenarioID int) (*domain.UserScenarioResult, error) {
-	// получает лучший результат пользователя для конкретного сценария
-	// если такого нет, то nil
-	panic("implement me")
+	const query = `
+		SELECT user_id, scenario_id, score, difficulty, status
+		FROM user_scenario_results
+		WHERE user_id = $1 AND scenario_id = $2
+	`
+
+	var result domain.UserScenarioResult
+	err := r.DB.QueryRowContext(ctx, query, userID, scenarioID).Scan(
+		&result.UserID, &result.ScenarioID, &result.Score, &result.Difficulty, &result.Status,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("get scenario result: %w", err)
+	}
+
+	return &result, nil
 }
 
-// добавить пересчет кол-ва пройденных (status = "green") сценариев (уникальных), то есть 2 успешных прохождения одного и того же сценария считаются как 1 прохождение
 func (r *ScenarioRepository) SaveScenarioResult(ctx context.Context, userID string, scenarioID int, score int, status string, difficulty string) error {
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -175,31 +191,45 @@ func (r *ScenarioRepository) SaveScenarioResult(ctx context.Context, userID stri
 	defer tx.Rollback()
 
 	const upsertQuery = `
-		INSERT INTO user_scenario_results (user_id, scenario_id, best_score, status, completed_at)
-		VALUES ($1, $2, $3, $4, NOW())
+		INSERT INTO user_scenario_results (user_id, scenario_id, score, difficulty, status, completed_at)
+		VALUES ($1, $2, $3, $4, $5, NOW())
 		ON CONFLICT (user_id, scenario_id) DO UPDATE
-		SET best_score   = EXCLUDED.best_score,
+		SET score        = EXCLUDED.score,
+		    difficulty   = EXCLUDED.difficulty,
 		    status       = EXCLUDED.status,
 		    completed_at = EXCLUDED.completed_at
-		WHERE user_scenario_results.best_score < EXCLUDED.best_score
+		WHERE user_scenario_results.score < EXCLUDED.score
 	`
 
-	if _, err := tx.ExecContext(ctx, upsertQuery, userID, scenarioID, score, string(status)); err != nil {
+	if _, err := tx.ExecContext(ctx, upsertQuery, userID, scenarioID, score, difficulty, status); err != nil {
 		return fmt.Errorf("save scenario result: %w", err)
 	}
 
-	const recalcPointsQuery = `
+	const recalcStatsQuery = `
 		UPDATE users
 		SET points = (
-			SELECT COALESCE(SUM(best_score), 0)
+			SELECT COALESCE(SUM(score), 0)
 			FROM user_scenario_results
 			WHERE user_id = $1
+		),
+		completed_easy_scenarios = (
+			SELECT COUNT(*)
+			FROM user_scenario_results
+			WHERE user_id = $1 AND status = $2 AND difficulty = $3
+		),
+		completed_hard_scenarios = (
+			SELECT COUNT(*)
+			FROM user_scenario_results
+			WHERE user_id = $1 AND status = $2 AND difficulty = $4
 		)
 		WHERE id = $1
 	`
 
-	if _, err := tx.ExecContext(ctx, recalcPointsQuery, userID); err != nil {
-		return fmt.Errorf("recalc user points: %w", err)
+	if _, err := tx.ExecContext(
+		ctx, recalcStatsQuery, userID,
+		string(domain.StatusGreen), string(domain.DifficultyEasy), string(domain.DifficultyHard),
+	); err != nil {
+		return fmt.Errorf("recalc user stats: %w", err)
 	}
 
 	if err := tx.Commit(); err != nil {
