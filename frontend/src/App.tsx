@@ -1,7 +1,8 @@
+import { Outlet } from 'react-router';
 import './style.css';
 
 function App() {
-  return <h1>Hello World!</h1>;
+  return <Outlet />;
 }
 
 export default App;
