@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS scenarios (
     description TEXT NOT NULL,
     role VARCHAR(50) NOT NULL,
     difficulty VARCHAR(50) NOT NULL,
-    required_points INT NOT NULL DEFAULT 0,
+    required_scenarios_this_level INT NOT NULL DEFAULT 0,
     start_node_id INT NULL
 );
 
@@ -26,27 +26,22 @@ CREATE TABLE IF NOT EXISTS scenario_options (
     from_node_id INT NOT NULL REFERENCES scenario_nodes(id) ON DELETE CASCADE,
     to_node_id INT NOT NULL REFERENCES scenario_nodes(id) ON DELETE CASCADE,
     message_text TEXT NOT NULL,
+    feedback_text TEXT NOT NULL,
+    how_to_recognize_in_life TEXT NOT NULL,
     status VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_scenario_results (
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     scenario_id INT NOT NULL REFERENCES scenarios(id) ON DELETE CASCADE,
-    best_score INT NOT NULL DEFAULT 0,
+    score INT NOT NULL DEFAULT 0,
+    difficulty TEXT NOT NULL,
     status VARCHAR(20) NOT NULL,
     completed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     PRIMARY KEY (user_id, scenario_id)
 );
 
-ALTER TABLE users
-ADD COLUMN points INT NOT NULL DEFAULT 0,
-ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'Новичок';
-
 -- +goose Down
-ALTER TABLE users
-DROP COLUMN IF EXISTS points,
-DROP COLUMN IF EXISTS status;
-
 DROP TABLE IF EXISTS user_scenario_results;
 
 DROP TABLE IF EXISTS scenario_options;

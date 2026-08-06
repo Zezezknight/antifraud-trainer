@@ -17,7 +17,8 @@ type ScenarioService interface {
 	GetOptionsForNode(ctx context.Context, nodeID int) ([]*domain.ScenarioOption, error)
 	GetOptionByID(ctx context.Context, optionID int) (*domain.ScenarioOption, error)
 	GetNodeByID(ctx context.Context, nodeID int) (*domain.ScenarioNode, error)
-	SaveScenarioResult(ctx context.Context, userID string, scenarioID int, score int, status domain.Status) error
+	SaveScenarioResult(ctx context.Context, userID string, scenarioID int, score int, status string, difficulty string) error
+	GetScenarioResult(ctx context.Context, userID string, scenarioID int) (*domain.UserScenarioResult, error)
 	GetLeaderBoard(ctx context.Context, userID string) ([]*domain.LeaderboardEntry, error)
 }
 

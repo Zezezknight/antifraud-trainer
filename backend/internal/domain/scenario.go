@@ -1,7 +1,5 @@
 package domain
 
-import "time"
-
 type Role string
 type Difficulty string
 type Status string
@@ -19,14 +17,15 @@ const (
 )
 
 type Scenario struct {
-	ID             int
-	Title          string
-	Description    string
-	Role           Role
-	Difficulty     Difficulty
-	RequiredPoints int
-	StartNodeID    int
-	IsAvailable    bool
+	ID                         int
+	Title                      string
+	Description                string
+	Role                       Role
+	Difficulty                 Difficulty
+	BestScore                  *int
+	RequiredScenariosThisLevel int
+	StartNodeID                int
+	IsAvailable                bool
 }
 
 type ScenarioNode struct {
@@ -38,19 +37,21 @@ type ScenarioNode struct {
 }
 
 type ScenarioOption struct {
-	ID          int
-	FromNodeID  int
-	ToNodeID    int
-	MessageText string
-	Status      Status
+	ID                   int
+	FromNodeID           int
+	ToNodeID             int
+	MessageText          string
+	FeedbackText         string
+	HowToRecognizeInLife string
+	Status               Status
 }
 
 type UserScenarioResult struct {
-	UserID      string
-	ScenarioID  int
-	BestScore   int
-	Status      Status
-	CompletedAt time.Time
+	UserID     string
+	ScenarioID int
+	Score      int
+	Difficulty Difficulty
+	Status     Status
 }
 
 type LeaderboardEntry struct {

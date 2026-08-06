@@ -83,3 +83,8 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id string) (*domain.Us
 
 	return &user, nil
 }
+
+func (r *UserRepository) UpdateUserStatus(ctx context.Context, id string, status string) error {
+	// устанавливает полученный статус пользователю
+	panic("implement me")
+}

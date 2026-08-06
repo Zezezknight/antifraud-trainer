@@ -13,6 +13,7 @@ type UserRepoProvider interface {
 	CreateUser(ctx context.Context, username string, password string) (*domain.User, error)
 	GetUserByUsername(ctx context.Context, username string) (*domain.User, error)
 	GetUserByID(ctx context.Context, id string) (*domain.User, error)
+	UpdateUserStatus(ctx context.Context, id string, status string) error
 }
 
 type UserService struct {
@@ -65,4 +66,9 @@ func (s *UserService) LoginUser(ctx context.Context, username string, password s
 	}
 
 	return user, nil
+}
+
+func (s *UserService) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
+	// возвращает пользователя по его ID
+	panic("implement me")
 }

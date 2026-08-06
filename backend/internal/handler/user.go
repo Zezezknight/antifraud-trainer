@@ -15,21 +15,22 @@ type TokenGenerator interface {
 type UserService interface {
 	RegisterUser(ctx context.Context, username string, password string) (*domain.User, error)
 	LoginUser(ctx context.Context, username string, password string) (*domain.User, error)
+	GetUserByID(ctx context.Context, id string) (*domain.User, error)
 }
 
-type AuthHandler struct {
+type UserHandler struct {
 	userService    UserService
 	tokenGenerator TokenGenerator
 }
 
-func NewAuthHandler(userService UserService, tokenGenerator TokenGenerator) *AuthHandler {
-	return &AuthHandler{
+func NewUserHandler(userService UserService, tokenGenerator TokenGenerator) *UserHandler {
+	return &UserHandler{
 		userService:    userService,
 		tokenGenerator: tokenGenerator,
 	}
 }
 
-func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var AuthReq dto.AuthRequest
 	if err := json.NewDecoder(r.Body).Decode(&AuthReq); err != nil {
 		writeError(w, http.StatusBadRequest, CodeInvalidJson, MessageInvalidJson, err)
@@ -58,7 +59,7 @@ func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	writeResponse(w, http.StatusOK, resp)
 }
 
-func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	var AuthReq dto.AuthRequest
 	if err := json.NewDecoder(r.Body).Decode(&AuthReq); err != nil {
 		writeError(w, http.StatusBadRequest, CodeInvalidJson, MessageInvalidJson, err)
@@ -85,4 +86,9 @@ func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 	writeResponse(w, http.StatusOK, resp)
+}
+
+func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
+	// возвращает пользователя по его ID
+	panic("implement me")
 }

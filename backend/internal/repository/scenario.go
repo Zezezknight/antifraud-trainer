@@ -162,10 +162,12 @@ func (r *ScenarioRepository) GetOptionByID(ctx context.Context, optionID int) (*
 
 func (r *ScenarioRepository) GetScenarioResult(ctx context.Context, userID string, scenarioID int) (*domain.UserScenarioResult, error) {
 	// получает лучший результат пользователя для конкретного сценария
+	// если такого нет, то nil
 	panic("implement me")
 }
 
-func (r *ScenarioRepository) SaveScenarioResult(ctx context.Context, userID string, scenarioID int, score int, status domain.Status) error {
+// добавить пересчет кол-ва пройденных (status = "green") сценариев (уникальных), то есть 2 успешных прохождения одного и того же сценария считаются как 1 прохождение
+func (r *ScenarioRepository) SaveScenarioResult(ctx context.Context, userID string, scenarioID int, score int, status string, difficulty string) error {
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("save scenario result: %w", err)
