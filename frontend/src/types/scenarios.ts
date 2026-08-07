@@ -1,11 +1,19 @@
 import * as z from 'zod';
 
+export const DIFFICULTIES = ['easy', 'hard'] as const;
+export type Difficulty = (typeof DIFFICULTIES)[number];
+
+export const ROLES = ['buyer', 'seller'] as const;
+export type Role = (typeof ROLES)[number];
+
 export const ScenarioResponse = z.object({
   id: z.number(),
   title: z.string(),
   description: z.string(),
-  role: z.string(),
-  required_points: z.number(),
+  role: z.enum(ROLES),
+  difficulty: z.enum(DIFFICULTIES),
+  best_score: z.number().nullable(),
+  required_scenarios_this_level: z.number(),
   is_available: z.boolean(),
 });
 
@@ -16,8 +24,14 @@ export const ScenarioSchema = ScenarioResponse.transform(data => ({
   title: data.title,
   description: data.description,
   role: data.role,
-  requiredPoints: data.required_points,
+  difficulty: data.difficulty,
+  bestScore: data.best_score,
+  requiredScenariosThisLevel: data.required_scenarios_this_level,
   isAvailable: data.is_available,
 }));
 
-export type Scenario = z.infer<typeof ScenarioSchema>;
+type BaseScenario = z.infer<typeof ScenarioSchema>;
+
+export type Scenario<T extends Role = Role> = Omit<BaseScenario, 'role'> & {
+  role: T;
+};
