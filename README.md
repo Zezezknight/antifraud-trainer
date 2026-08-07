@@ -35,7 +35,7 @@ git clone git@github.com:Zezezknight/avito-antifraud-trainer.git
 cd ./avito-antifraud-trainer
 
 # Настройка переменных окружения
-mv .env.example .env
+mv backend/.env.example backend/.env
 
 # Запуск контейнеров
 docker compose up -d
