@@ -15,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { registerUser } from '@/service/auth';
 import { useSetUser } from '@/store/user';
-import { isApiError } from '@/types';
+import { isApiError } from '@/types/api';
 import axios from 'axios';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
