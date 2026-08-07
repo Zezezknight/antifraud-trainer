@@ -52,9 +52,9 @@ function ScenarioCard({ scenario }: ScenarioCardProps) {
             <Link to={`/scenarios/${scenario.id}`}>
               <Button
                 className="cursor-pointer"
-                variant={score === null ? 'outline' : 'default'}
+                variant={score === null ? 'default' : 'outline'}
               >
-                {score === null ? 'Перепройти' : 'Начать'} <ArrowRight />
+                {score === null ? 'Начать' : 'Перепройти'} <ArrowRight />
               </Button>
             </Link>
           </>
