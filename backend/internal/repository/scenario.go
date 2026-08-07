@@ -26,7 +26,7 @@ func (r *ScenarioRepository) GetScenarios(ctx context.Context, role string) ([]*
 
 	rows, err := r.DB.QueryContext(ctx, query, role)
 	if err != nil {
-		return nil, fmt.Errorf("get scenarios: %w", err)
+		return nil, fmt.Errorf("select scenarios: %w", err)
 	}
 	defer rows.Close()
 
@@ -48,7 +48,7 @@ func (r *ScenarioRepository) GetScenarios(ctx context.Context, role string) ([]*
 		scenarios = append(scenarios, &s)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("get scenarios: %w", err)
+		return nil, fmt.Errorf("select scenarios: %w", err)
 	}
 
 	return scenarios, nil
@@ -72,7 +72,7 @@ func (r *ScenarioRepository) GetScenarioByID(ctx context.Context, scenarioID int
 		return nil, domain.ErrScenarioNotFound
 	}
 	if err != nil {
-		return nil, fmt.Errorf("get scenario by id: %w", err)
+		return nil, fmt.Errorf("select scenario by id: %w", err)
 	}
 
 	if startNodeID.Valid {
@@ -99,7 +99,7 @@ func (r *ScenarioRepository) GetNodeByID(ctx context.Context, nodeID int) (*doma
 		return nil, domain.ErrScenarioNodeNotFound
 	}
 	if err != nil {
-		return nil, fmt.Errorf("get node by id: %w", err)
+		return nil, fmt.Errorf("select node by id: %w", err)
 	}
 
 	if finalStatus.Valid {
@@ -120,7 +120,7 @@ func (r *ScenarioRepository) GetOptionsForNode(ctx context.Context, nodeID int) 
 
 	rows, err := r.DB.QueryContext(ctx, query, nodeID)
 	if err != nil {
-		return nil, fmt.Errorf("get options for node: %w", err)
+		return nil, fmt.Errorf("select options: %w", err)
 	}
 	defer rows.Close()
 
@@ -130,12 +130,12 @@ func (r *ScenarioRepository) GetOptionsForNode(ctx context.Context, nodeID int) 
 		if err := rows.Scan(
 			&o.ID, &o.FromNodeID, &o.ToNodeID, &o.MessageText, &o.FeedbackText, &o.HowToRecognizeInLife, &o.Status,
 		); err != nil {
-			return nil, fmt.Errorf("scan scenario option: %w", err)
+			return nil, fmt.Errorf("scan option: %w", err)
 		}
 		options = append(options, &o)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("get options for node: %w", err)
+		return nil, fmt.Errorf("select options: %w", err)
 	}
 
 	return options, nil
@@ -156,7 +156,7 @@ func (r *ScenarioRepository) GetOptionByID(ctx context.Context, optionID int) (*
 		return nil, domain.ErrScenarioOptionNotFound
 	}
 	if err != nil {
-		return nil, fmt.Errorf("get option by id: %w", err)
+		return nil, fmt.Errorf("select option by id: %w", err)
 	}
 
 	return &option, nil
@@ -183,7 +183,7 @@ func (r *ScenarioRepository) GetScenarioResult(ctx context.Context, userID strin
 		return nil, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("get scenario result: %w", err)
+		return nil, fmt.Errorf("select scenario result: %w", err)
 	}
 
 	return &result, nil
@@ -192,7 +192,7 @@ func (r *ScenarioRepository) GetScenarioResult(ctx context.Context, userID strin
 func (r *ScenarioRepository) SaveScenarioResult(ctx context.Context, userID string, scenarioID int, score int, status string, difficulty string) error {
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("save scenario result: %w", err)
+		return fmt.Errorf("insert scenario result: %w", err)
 	}
 	defer tx.Rollback()
 
@@ -208,7 +208,7 @@ func (r *ScenarioRepository) SaveScenarioResult(ctx context.Context, userID stri
     `
 
 	if _, err := tx.ExecContext(ctx, upsertQuery, userID, scenarioID, score, difficulty, status); err != nil {
-		return fmt.Errorf("save scenario result: %w", err)
+		return fmt.Errorf("insert scenario result: %w", err)
 	}
 
 	const recalcStatsQuery = `
@@ -235,11 +235,11 @@ func (r *ScenarioRepository) SaveScenarioResult(ctx context.Context, userID stri
 		ctx, recalcStatsQuery, userID,
 		string(domain.StatusGreen), string(domain.DifficultyEasy), string(domain.DifficultyHard),
 	); err != nil {
-		return fmt.Errorf("recalc user stats: %w", err)
+		return fmt.Errorf("update user stats: %w", err)
 	}
 
 	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("save scenario result: %w", err)
+		return fmt.Errorf("insert scenario result: %w", err)
 	}
 
 	return nil
@@ -264,7 +264,7 @@ func (r *ScenarioRepository) GetLeaderBoard(ctx context.Context, userID string) 
 
 	rows, err := r.DB.QueryContext(ctx, query, userID)
 	if err != nil {
-		return nil, fmt.Errorf("get leaderboard: %w", err)
+		return nil, fmt.Errorf("select leaderboard: %w", err)
 	}
 	defer rows.Close()
 
@@ -277,7 +277,7 @@ func (r *ScenarioRepository) GetLeaderBoard(ctx context.Context, userID string) 
 		entries = append(entries, &e)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("get leaderboard: %w", err)
+		return nil, fmt.Errorf("select leaderboard: %w", err)
 	}
 
 	return entries, nil

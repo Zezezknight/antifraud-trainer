@@ -6,6 +6,7 @@ import (
 	"avito-antifraud-trainer/internal/userctx"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 )
@@ -77,6 +78,10 @@ func (h *ScenarioHandler) GetScenarioByID(w http.ResponseWriter, r *http.Request
 	}
 	scenario, err := h.scenarioService.GetScenarioByID(r.Context(), scenarioID)
 	if err != nil {
+		if errors.Is(err, domain.ErrScenarioNotFound) {
+			writeError(w, http.StatusNotFound, CodeNotFound, MessageNotFound, err)
+			return
+		}
 		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}
@@ -109,6 +114,10 @@ func (h *ScenarioHandler) StartScenario(w http.ResponseWriter, r *http.Request) 
 
 	startNode, err := h.scenarioService.GetNodeByID(r.Context(), scenarioID)
 	if err != nil {
+		if errors.Is(err, domain.ErrScenarioNodeNotFound) {
+			writeError(w, http.StatusNotFound, CodeNotFound, MessageNotFound, err)
+			return
+		}
 		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}
@@ -166,6 +175,10 @@ func (h *ScenarioHandler) ScenarioStep(w http.ResponseWriter, r *http.Request) {
 	optionID := stepReq.OptionID
 	nextNode, err := h.scenarioService.ProcessStep(r.Context(), optionID)
 	if err != nil {
+		if errors.Is(err, domain.ErrScenarioOptionNotFound) || errors.Is(err, domain.ErrScenarioNodeNotFound) {
+			writeError(w, http.StatusNotFound, CodeNotFound, MessageNotFound, err)
+			return
+		}
 		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}
@@ -222,6 +235,10 @@ func (h *ScenarioHandler) FinishScenario(w http.ResponseWriter, r *http.Request)
 
 	scenario, err := h.scenarioService.GetScenarioByID(r.Context(), scenarioID)
 	if err != nil {
+		if errors.Is(err, domain.ErrScenarioNotFound) {
+			writeError(w, http.StatusNotFound, CodeNotFound, MessageNotFound, err)
+			return
+		}
 		writeError(w, http.StatusBadRequest, CodeBadRequest, MessageInvalidID, err)
 		return
 	}
@@ -234,6 +251,10 @@ func (h *ScenarioHandler) FinishScenario(w http.ResponseWriter, r *http.Request)
 
 	err = h.scenarioService.SaveScenarioResult(r.Context(), userID, scenarioID, result.Score, result.Status, string(scenario.Difficulty))
 	if err != nil {
+		if errors.Is(err, domain.ErrUserNotFound) {
+			writeError(w, http.StatusNotFound, CodeNotFound, MessageNotFound, err)
+			return
+		}
 		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}

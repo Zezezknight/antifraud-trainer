@@ -36,19 +36,19 @@ func (s *ScenarioService) GetAvailableScenarios(
 ) ([]*domain.Scenario, error) {
 	_, err := s.userRepo.GetUserByID(ctx, userID)
 	if err != nil {
-		return nil, fmt.Errorf("userRepo.GetUserByID: %w", err)
+		return nil, fmt.Errorf("failed to get user by id: %w", err)
 	}
 
 	scenarios, err := s.scenarioRepo.GetScenarios(ctx, role)
 	if err != nil {
-		return nil, fmt.Errorf("scenarioRepo.GetScenarios: %w", err)
+		return nil, fmt.Errorf("failed to get scenarios: %w", err)
 	}
 
 	completedByDifficulty := make(map[domain.Difficulty]int)
 	for _, sc := range scenarios {
 		result, err := s.scenarioRepo.GetScenarioResult(ctx, userID, sc.ID)
 		if err != nil {
-			return nil, fmt.Errorf("scenarioRepo.GetScenarioResult: %w", err)
+			return nil, fmt.Errorf("failed to get scenario results: %w", err)
 		}
 
 		if result != nil {
@@ -74,10 +74,7 @@ func (s *ScenarioService) GetScenarioByID(
 ) (*domain.Scenario, error) {
 	scenario, err := s.scenarioRepo.GetScenarioByID(ctx, scenarioID)
 	if err != nil {
-		return nil, fmt.Errorf("scenarioRepo.GetScenarioByID: %w", err)
-	}
-	if scenario == nil {
-		return nil, domain.ErrScenarioNotFound
+		return nil, fmt.Errorf("failed to get scenario by id: %w", err)
 	}
 	return scenario, nil
 }
@@ -88,10 +85,7 @@ func (s *ScenarioService) GetNodeByID(
 ) (*domain.ScenarioNode, error) {
 	node, err := s.scenarioRepo.GetNodeByID(ctx, nodeID)
 	if err != nil {
-		return nil, fmt.Errorf("scenarioRepo.GetNodeByID: %w", err)
-	}
-	if node == nil {
-		return nil, domain.ErrScenarioNodeNotFound
+		return nil, fmt.Errorf("failed to get node by id %w", err)
 	}
 	return node, nil
 }
@@ -99,10 +93,7 @@ func (s *ScenarioService) GetNodeByID(
 func (s *ScenarioService) GetOptionByID(ctx context.Context, optionID int) (*domain.ScenarioOption, error) {
 	option, err := s.scenarioRepo.GetOptionByID(ctx, optionID)
 	if err != nil {
-		return nil, fmt.Errorf("scenarioRepo.GetOptionByID: %w", err)
-	}
-	if option == nil {
-		return nil, domain.ErrScenarioOptionNotFound
+		return nil, fmt.Errorf("failed to get option by id: %w", err)
 	}
 	return option, nil
 }
@@ -113,18 +104,12 @@ func (s *ScenarioService) ProcessStep(
 ) (*domain.ScenarioNode, error) {
 	option, err := s.scenarioRepo.GetOptionByID(ctx, currentOptionID)
 	if err != nil {
-		return nil, fmt.Errorf("scenarioRepo.GetOptionByID: %w", err)
-	}
-	if option == nil {
-		return nil, domain.ErrScenarioOptionNotFound
+		return nil, fmt.Errorf("failed to get option by id: %w", err)
 	}
 
 	nextNode, err := s.scenarioRepo.GetNodeByID(ctx, option.ToNodeID)
 	if err != nil {
-		return nil, fmt.Errorf("scenarioRepo.GetNodeByID (next): %w", err)
-	}
-	if nextNode == nil {
-		return nil, domain.ErrScenarioNodeNotFound
+		return nil, fmt.Errorf("failed to get next node by id: %w", err)
 	}
 
 	return nextNode, nil
@@ -136,7 +121,7 @@ func (s *ScenarioService) GetOptionsForNode(
 ) ([]*domain.ScenarioOption, error) {
 	options, err := s.scenarioRepo.GetOptionsForNode(ctx, nodeID)
 	if err != nil {
-		return nil, fmt.Errorf("scenarioRepo.GetOptionsForNode: %w", err)
+		return nil, fmt.Errorf("failed to get options for node: %w", err)
 	}
 	return options, nil
 }
@@ -150,12 +135,12 @@ func (s *ScenarioService) SaveScenarioResult(
 	difficulty string,
 ) error {
 	if err := s.scenarioRepo.SaveScenarioResult(ctx, userID, scenarioID, score, status, difficulty); err != nil {
-		return fmt.Errorf("scenarioRepo.SaveScenarioResult: %w", err)
+		return fmt.Errorf("failed to save new scenario result: %w", err)
 	}
 
 	user, err := s.userRepo.GetUserByID(ctx, userID)
 	if err != nil {
-		return fmt.Errorf("userRepo.GetUserByID: %w", err)
+		return fmt.Errorf("failed to get user by id: %w", err)
 	}
 
 	var newStatus string
@@ -167,12 +152,12 @@ func (s *ScenarioService) SaveScenarioResult(
 	case user.Points >= 100:
 		newStatus = "Бдительный"
 	default:
-		newStatus = ""
+		newStatus = "Новичок"
 	}
 
 	if user.Status != newStatus {
 		if err := s.userRepo.UpdateUserStatus(ctx, userID, newStatus); err != nil {
-			return fmt.Errorf("userRepo.UpdateUserStatus: %w", err)
+			return fmt.Errorf("failed to update user status: %w", err)
 		}
 	}
 
@@ -186,7 +171,7 @@ func (s *ScenarioService) GetScenarioResult(
 ) (*domain.UserScenarioResult, error) {
 	result, err := s.scenarioRepo.GetScenarioResult(ctx, userID, scenarioID)
 	if err != nil {
-		return nil, fmt.Errorf("scenarioRepo.GetScenarioResult: %w", err)
+		return nil, fmt.Errorf("failed to get scenario result: %w", err)
 	}
 	return result, nil
 }
@@ -194,7 +179,7 @@ func (s *ScenarioService) GetScenarioResult(
 func (s *ScenarioService) GetLeaderBoard(ctx context.Context, userID string) ([]*domain.LeaderboardEntry, error) {
 	leaderboard, err := s.scenarioRepo.GetLeaderBoard(ctx, userID)
 	if err != nil {
-		return nil, fmt.Errorf("scenarioRepo.GetLeaderBoard: %w", err)
+		return nil, fmt.Errorf("failed to get leaderboard: %w", err)
 	}
 	return leaderboard, nil
 }
