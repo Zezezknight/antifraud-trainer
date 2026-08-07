@@ -33,7 +33,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	slog.Info("Запускаю миграции...")
 	if err = repository.RunMigrations(db); err != nil {

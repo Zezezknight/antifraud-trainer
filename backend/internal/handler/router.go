@@ -38,12 +38,12 @@ func NewRouter(userHandler *UserHandler, scenarioHandler *ScenarioHandler, tv mi
 
 	router.Get("/swagger", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write(swaggerHTML)
+		_, _ = w.Write(swaggerHTML)
 	})
 
 	router.Get("/swagger/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/x-yaml")
-		w.Write(openAPISpec)
+		_, _ = w.Write(openAPISpec)
 	})
 
 	router.Route("/api", func(r chi.Router) {

@@ -28,7 +28,9 @@ func (r *ScenarioRepository) GetScenarios(ctx context.Context, role string) ([]*
 	if err != nil {
 		return nil, fmt.Errorf("select scenarios: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	var scenarios []*domain.Scenario
 	for rows.Next() {
@@ -122,7 +124,9 @@ func (r *ScenarioRepository) GetOptionsForNode(ctx context.Context, nodeID int) 
 	if err != nil {
 		return nil, fmt.Errorf("select options: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	var options []*domain.ScenarioOption
 	for rows.Next() {
@@ -194,7 +198,9 @@ func (r *ScenarioRepository) SaveScenarioResult(ctx context.Context, userID stri
 	if err != nil {
 		return fmt.Errorf("insert scenario result: %w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	const upsertQuery = `
        INSERT INTO user_scenario_results (user_id, scenario_id, score, difficulty, status, completed_at)
@@ -266,7 +272,9 @@ func (r *ScenarioRepository) GetLeaderBoard(ctx context.Context, userID string) 
 	if err != nil {
 		return nil, fmt.Errorf("select leaderboard: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	var entries []*domain.LeaderboardEntry
 	for rows.Next() {
