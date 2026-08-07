@@ -1,9 +1,11 @@
-import { useUser } from '@/store/user';
+import { useAuth } from '@/hooks/auth';
+import HydrateFallbackPage from '@/pages/HydrateFallback';
 import { Navigate, Outlet } from 'react-router';
 
 function ProtectedRoutes() {
-  const user = useUser();
-  const isAuth = user !== null;
+  const { isAuth, isHydrated } = useAuth();
+
+  if (!isHydrated) return <HydrateFallbackPage />;
 
   return isAuth ? <Outlet /> : <Navigate to="/login" replace />;
 }
