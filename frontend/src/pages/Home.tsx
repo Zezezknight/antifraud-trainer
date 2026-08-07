@@ -18,7 +18,7 @@ function Home() {
           не раскрывается — будьте внимательны в моменте.
         </p>
       </div>
-      <div className="container mx-auto px-8">
+      <div className="container mx-auto px-8 pb-12">
         <Tabs defaultValue="seller">
           <TabsList className="w-full flex items-center bg-muted border-2 border-border mb-8">
             <TabsTrigger className="cursor-pointer" value="seller">
