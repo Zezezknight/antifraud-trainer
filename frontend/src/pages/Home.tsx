@@ -5,12 +5,15 @@ import type { HomeLoader } from '@/loaders/home';
 import { useLoaderData } from 'react-router';
 
 function Home() {
-  const { seller: sellerScenarios, buyer: buyerScenarios } =
-    useLoaderData<HomeLoader>();
+  const {
+    profile: userProfile,
+    seller: sellerScenarios,
+    buyer: buyerScenarios,
+  } = useLoaderData<HomeLoader>();
 
   return (
     <>
-      <NavigationBar />
+      <NavigationBar points={userProfile.points} status={userProfile.status} />
       <div className="container mx-auto px-8 flex flex-col gap-4 sm:gap-8">
         <h1 className="text-3xl sm:text-4xl font-bold">Выберите сценарий</h1>
         <p className="text-md sm:text-lg md:w-3/4 lg:w-1/2">
