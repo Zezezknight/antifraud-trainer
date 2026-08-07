@@ -17,8 +17,6 @@ export const ScenarioResponse = z.object({
   is_available: z.boolean(),
 });
 
-export type ScenarioResponse = z.infer<typeof ScenarioResponse>;
-
 export const ScenarioSchema = ScenarioResponse.transform(data => ({
   id: data.id,
   title: data.title,
