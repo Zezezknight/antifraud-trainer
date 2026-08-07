@@ -1,7 +1,13 @@
 import NavigationBar from '@/components/NavigationBar';
+import Scenarios from '@/components/Scenarios/Scenarios';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { HomeLoader } from '@/loaders/home';
+import { useLoaderData } from 'react-router';
 
 function Home() {
+  const { seller: sellerScenarios, buyer: buyerScenarios } =
+    useLoaderData<HomeLoader>();
+
   return (
     <>
       <NavigationBar />
@@ -22,8 +28,20 @@ function Home() {
               Покупатель
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="seller">Сценарии для "Продавец"</TabsContent>
-          <TabsContent value="buery">Сценарии для "Покупатель"</TabsContent>
+          <TabsContent className="flex flex-col gap-8" value="seller">
+            {sellerScenarios.length ? (
+              <Scenarios scenarios={sellerScenarios} />
+            ) : (
+              'Сценариев для продавца нет.'
+            )}
+          </TabsContent>
+          <TabsContent className="flex flex-col gap-8" value="buery">
+            {buyerScenarios.length ? (
+              <Scenarios scenarios={buyerScenarios} />
+            ) : (
+              'Сценариев для покупателя нет.'
+            )}
+          </TabsContent>
         </Tabs>
       </div>
     </>
