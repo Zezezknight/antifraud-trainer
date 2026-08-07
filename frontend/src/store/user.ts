@@ -31,4 +31,8 @@ const useUserStore = create<UserState>()(
 
 export const useUser = () => useUserStore(state => state.user);
 export const useSetUser = () => useUserStore(state => state.setUser);
+export const clearUser = () => useUserStore.setState({ user: null });
+
 export const useUserHydrated = () => useUserStore(state => state.isHydrated);
+
+export const getAuthToken = () => useUserStore.getState().user?.token ?? null;
