@@ -1,6 +1,6 @@
 import axios, { AxiosHeaders } from 'axios';
 import { getAuthToken } from '@/store/user';
-import { getTokenFromLocalStorage } from './auth';
+import { getTokenFromLocalStorage } from '@/utils/auth';
 
 const api = axios.create({
   baseURL: '/api',
