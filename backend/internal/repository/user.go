@@ -36,7 +36,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, username string, passwo
 		if errors.As(err, &pgErr) && pgErr.Code == uniqueViolationCode {
 			return nil, domain.ErrUserAlreadyExists
 		}
-		return nil, fmt.Errorf("create user: %w", err)
+		return nil, fmt.Errorf("insert user: %w", err)
 	}
 
 	return &user, nil
@@ -57,7 +57,7 @@ func (r *UserRepository) GetUserByUsername(ctx context.Context, username string)
 		return nil, domain.ErrUserNotFound
 	}
 	if err != nil {
-		return nil, fmt.Errorf("get user by username: %w", err)
+		return nil, fmt.Errorf("select user by username: %w", err)
 	}
 
 	return &user, nil
@@ -78,7 +78,7 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id string) (*domain.Us
 		return nil, domain.ErrUserNotFound
 	}
 	if err != nil {
-		return nil, fmt.Errorf("get user by id: %w", err)
+		return nil, fmt.Errorf("select user by id: %w", err)
 	}
 
 	return &user, nil

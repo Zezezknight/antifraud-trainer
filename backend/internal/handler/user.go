@@ -6,6 +6,7 @@ import (
 	"avito-antifraud-trainer/internal/userctx"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 )
 
@@ -40,6 +41,18 @@ func (h *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.userService.RegisterUser(r.Context(), AuthReq.Username, AuthReq.Password)
 	if err != nil {
+		if errors.Is(err, domain.ErrUsernameTooShort) {
+			writeError(w, http.StatusBadRequest, CodeBadRequest, MessageUsernameTooShort, err)
+			return
+		}
+		if errors.Is(err, domain.ErrPasswordTooShort) {
+			writeError(w, http.StatusBadRequest, CodeBadRequest, MessagePasswordTooShort, err)
+			return
+		}
+		if errors.Is(err, domain.ErrUserAlreadyExists) {
+			writeError(w, http.StatusConflict, CodeConflict, MessageUserAlreadyExists, err)
+			return
+		}
 		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}
@@ -73,6 +86,10 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.userService.LoginUser(r.Context(), AuthReq.Username, AuthReq.Password)
 	if err != nil {
+		if errors.Is(err, domain.ErrInvalidCredentials) {
+			writeError(w, http.StatusBadRequest, CodeInvalidCredentials, MessageInvalidCredentials, err)
+			return
+		}
 		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}
@@ -100,12 +117,16 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	userID, err := userctx.GetUserID(r.Context())
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
+		writeError(w, http.StatusUnauthorized, CodeUnauthorized, MessageUnauthorized, err)
 		return
 	}
 
 	user, err := h.userService.GetUserByID(r.Context(), userID)
 	if err != nil {
+		if errors.Is(err, domain.ErrUserNotFound) {
+			writeError(w, http.StatusNotFound, CodeNotFound, MessageNotFound, err)
+			return
+		}
 		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}

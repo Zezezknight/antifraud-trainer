@@ -13,4 +13,6 @@ var (
 	ErrScenarioOptionNotFound = errors.New("вариант ответа не найден")
 	ErrScenarioNotFound       = errors.New("сценарий не найден")
 	ErrScenarioResultNotFound = errors.New("результат сценария не найден")
+	ErrUsernameTooShort       = errors.New("имя пользователя должно содержать не менее 3 символов")
+	ErrPasswordTooShort       = errors.New("пароль должен быть не менее 6 символов")
 )

@@ -25,13 +25,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
         '400':
-          description: Некорректный формат JSON в теле запроса
+          description: Ошибки клиентского запроса
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                InvalidJson:
+                  summary: Некорректный JSON
+                  value:
+                    code: "INVALID JSON"
+                    message: "некорректный формат данных"
+                UsernameTooShort:
+                  summary: Слишком короткое имя пользователя
+                  value:
+                    code: "BAD REQUEST"
+                    message: "имя пользователя должно содержать не менее 3 символов"
+                PasswordTooShort:
+                  summary: Слишком короткий пароль
+                  value:
+                    code: "BAD REQUEST"
+                    message: "пароль должен быть не менее 6 символов"
+
+        '409':
+          description: Пользователь с таким именем уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "CONFLICT"
+                message: "пользователь с таким именем уже существует"
+
         '500':
-          description: Внутренняя ошибка сервера (ошибка базы данных или генерации токена)
+          description: Внутренняя ошибка сервера
           content:
             application/json:
               schema:
@@ -57,11 +84,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
         '400':
-          description: Некорректный формат JSON в теле запроса
+          description: Ошибки клиентского запроса
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                InvalidJson:
+                  summary: Некорректный JSON
+                  value:
+                    code: "INVALID JSON"
+                    message: "некорректный формат данных"
+                InvalidCredentials:
+                  summary: Неверный логин или пароль
+                  value:
+                    code: "INVALID CREDENTIALS"
+                    message: "неверный логин или пароль"
+
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -91,6 +130,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "NOT FOUND"
+                message: "ресурс не найден"
+
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -392,10 +445,10 @@ components:
       properties:
         code:
           type: string
-          example: "INVALID_JSON"
+          example: "INTERNAL ERROR"
         message:
           type: string
-          example: "Invalid JSON format in request body"
+          example: "внутренняя ошибка сервера"
 
     Scenario:
       type: object

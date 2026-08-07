@@ -3,6 +3,7 @@ package service
 import (
 	"avito-antifraud-trainer/internal/domain"
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -29,21 +30,21 @@ func NewUserService(repo UserRepoProvider) *UserService {
 func (s *UserService) RegisterUser(ctx context.Context, username string, password string) (*domain.User, error) {
 	username = strings.TrimSpace(username)
 	if len(username) < 3 {
-		return nil, fmt.Errorf("имя пользователя должно содержать не менее 3 символов")
+		return nil, domain.ErrUsernameTooShort
 	}
 
 	if len(password) < 6 {
-		return nil, fmt.Errorf("пароль должен быть не менее 6 символов")
+		return nil, domain.ErrPasswordTooShort
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при хэшировании пароля: %w", err)
+		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	user, err := s.repo.CreateUser(ctx, username, string(hashedPassword))
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при создании пользователя: %w", err)
+		return nil, fmt.Errorf("failed to compare hashes: %w", err)
 	}
 
 	return user, nil
@@ -57,12 +58,15 @@ func (s *UserService) LoginUser(ctx context.Context, username string, password s
 
 	user, err := s.repo.GetUserByUsername(ctx, username)
 	if err != nil {
-		return nil, domain.ErrInvalidCredentials
+		if errors.Is(err, domain.ErrUserNotFound) {
+			return nil, fmt.Errorf("failed to auth: %w: %w", domain.ErrInvalidCredentials, err)
+		}
+		return nil, fmt.Errorf("failed to auth: %w", err)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
-		return nil, domain.ErrInvalidCredentials
+		return nil, fmt.Errorf("failed to compare hashes: %w: %w", domain.ErrInvalidCredentials, err)
 	}
 
 	return user, nil
@@ -71,10 +75,7 @@ func (s *UserService) LoginUser(ctx context.Context, username string, password s
 func (s *UserService) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
 	user, err := s.repo.GetUserByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("repo.GetUserByID: %w", err)
-	}
-	if user == nil {
-		return nil, domain.ErrUserNotFound
+		return nil, fmt.Errorf("failed to get user by ID: %w", err)
 	}
 	return user, nil
 }
