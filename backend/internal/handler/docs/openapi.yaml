@@ -25,13 +25,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
         '400':
-          description: Некорректный формат JSON в теле запроса
+          description: Ошибки клиентского запроса
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                InvalidJson:
+                  summary: Некорректный JSON
+                  value:
+                    code: "INVALID JSON"
+                    message: "некорректный формат данных"
+                UsernameTooShort:
+                  summary: Слишком короткое имя пользователя
+                  value:
+                    code: "BAD REQUEST"
+                    message: "имя пользователя должно содержать не менее 3 символов"
+                PasswordTooShort:
+                  summary: Слишком короткий пароль
+                  value:
+                    code: "BAD REQUEST"
+                    message: "пароль должен быть не менее 6 символов"
+
+        '409':
+          description: Пользователь с таким именем уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "CONFLICT"
+                message: "пользователь с таким именем уже существует"
+
         '500':
-          description: Внутренняя ошибка сервера (ошибка базы данных или генерации токена)
+          description: Внутренняя ошибка сервера
           content:
             application/json:
               schema:
@@ -57,11 +84,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
         '400':
-          description: Некорректный формат JSON в теле запроса
+          description: Ошибки клиентского запроса
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                InvalidJson:
+                  summary: Некорректный JSON
+                  value:
+                    code: "INVALID JSON"
+                    message: "некорректный формат данных"
+                InvalidCredentials:
+                  summary: Неверный логин или пароль
+                  value:
+                    code: "INVALID CREDENTIALS"
+                    message: "неверный логин или пароль"
+
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -91,6 +130,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "NOT FOUND"
+                message: "ресурс не найден"
+
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -110,7 +163,7 @@ paths:
         - name: role
           in: query
           required: false
-          description: Фильтр по роли пользователя (например, buyer / seller)
+          description: Фильтр по роли пользователя (buyer / seller)
           schema:
             type: string
       responses:
@@ -128,6 +181,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -157,12 +213,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "BAD REQUEST"
+                message: "некорректный ID"
         '401':
           description: Ошибка авторизации
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+        '404':
+          description: Сценарий не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "NOT FOUND"
+                message: "ресурс не найден"
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -192,12 +263,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "BAD REQUEST"
+                message: "некорректный ID"
         '401':
           description: Ошибка авторизации
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+        '404':
+          description: Сценарий не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "NOT FOUND"
+                message: "ресурс не найден"
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -233,12 +319,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "BAD REQUEST"
+                message: "некорректный формат данных"
         '401':
           description: Ошибка авторизации
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+        '404':
+          description: Сценарий не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "NOT FOUND"
+                message: "ресурс не найден"
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -270,12 +371,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "BAD REQUEST"
+                message: "некорректный формат данных"
         '401':
           description: Ошибка авторизации
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+        '404':
+          description: Сценарий не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "NOT FOUND"
+                message: "ресурс не найден"
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -305,6 +421,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -392,10 +511,10 @@ components:
       properties:
         code:
           type: string
-          example: "INVALID_JSON"
+          example: "INTERNAL ERROR"
         message:
           type: string
-          example: "Invalid JSON format in request body"
+          example: "внутренняя ошибка сервера"
 
     Scenario:
       type: object
@@ -411,20 +530,27 @@ components:
       properties:
         id:
           type: integer
+          example: 1
         title:
           type: string
+          example: "Продажа умного пиксельного дисплея"
         description:
           type: string
+          example: "Вы продаете свой умный пиксельный дисплей Divoom Pixoo 64. Вы выложили объявление буквально 15 минут назад, и вам уже написал первый заинтересованный покупатель."
         role:
           type: string
+          example: "seller"
         difficulty:
           type: string
+          example: "easy"
         required_scenarios_this_level:
           type: integer
         is_available:
           type: boolean
+          example: true
         best_score:
           type: integer
+          example: 50
 
     ScenarioNode:
       type: object
@@ -437,14 +563,19 @@ components:
       properties:
         id:
           type: integer
+          example: 1
         scenario_id:
           type: integer
+          example: 1
         message_text:
           type: string
+          example: "Добрый день! Очень давно искал именно эту модель, хочу настроить кастомные анимации и циклы. Состояние рабочее? Готов сейчас же оформить доставку."
         is_final:
           type: boolean
+          example: false
         final_status:
           type: string
+          example: ""
 
     ScenarioOption:
       type: object
@@ -459,18 +590,25 @@ components:
       properties:
         id:
           type: integer
+          example: 1
         from_node_id:
           type: integer
+          example: 1
         to_node_id:
           type: integer
+          example: 2
         message_text:
           type: string
+          example: "Да, состояние идеальное. Оформляйте доставку в приложении."
         feedback_text:
           type: string
+          example: "Отличное начало! Вы переводите покупателя на официальный способ доставки."
         how_to_recognize_in_life:
           type: string
+          example: "Мошенники часто пытаются увести диалог в сторонние мессенджеры. Всегда настаивайте на оформлении внутри официального приложения."
         status:
           type: string
+          example: "green"
 
     StepRequest:
       type: object
@@ -479,6 +617,7 @@ components:
       properties:
         option_id:
           type: integer
+          example: 1
 
     StepResponse:
       type: object
@@ -501,8 +640,10 @@ components:
       properties:
         score:
           type: integer
+          example: 100
         status:
           type: string
+          example: "green"
 
     LeaderboardEntry:
       type: object
@@ -515,11 +656,16 @@ components:
       properties:
         rank:
           type: integer
+          example: 1
         user_id:
           type: string
+          example: "507f1f77bcf86cd799439011"
         username:
           type: string
+          example: "johndoe"
         points:
           type: integer
+          example: 100
         status:
           type: string
+          example: "Бдительный"
