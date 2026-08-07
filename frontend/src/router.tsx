@@ -7,6 +7,7 @@ import HydrateFallbackPage from './pages/HydrateFallback';
 import { LoginForm } from './components/LoginForm';
 import Auth from './layouts/Auth';
 import { RegisterForm } from './components/RegisterForm';
+import { homeLoader } from './loaders/home';
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
           {
             index: true, // Главная страница (/)
             element: <Home />,
+            loader: homeLoader,
           },
         ],
       },

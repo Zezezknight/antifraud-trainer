@@ -25,9 +25,7 @@ function IconInCircle({ icon, variants, backgroundColor }: IconInCircleProps) {
   }
 
   return (
-    <span
-      className={`inline-block rounded-full bg-${backgroundColor} ${padding}`}
-    >
+    <span className={`inline-block rounded-full ${backgroundColor} ${padding}`}>
       {icon}
     </span>
   );
