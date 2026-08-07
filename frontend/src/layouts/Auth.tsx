@@ -9,7 +9,7 @@ const ListItem = ({ children }: { children: string }) => (
     <IconInCircle
       icon={<ShieldCheck className="text-primary" />}
       variants="sm"
-      backgroundColor="background"
+      backgroundColor="bg-background"
     />
     {children}
   </li>
