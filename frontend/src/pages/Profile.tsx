@@ -42,7 +42,7 @@ function Profile() {
             <span className="text-2xl font-bold">{userProfile.user.name}</span>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <StatsCard
               icon={<CircleStar />}
               title="Очки"
