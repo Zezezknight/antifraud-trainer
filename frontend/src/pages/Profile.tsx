@@ -90,7 +90,7 @@ function Profile() {
       <NavigationBar points={userPoints} status={userStatus} />
 
       <div className="container-box">
-        <div className="bg-background px-8 py-6 rounded-lg flex flex-col gap-8">
+        <div className="bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
           <div className="flex items-center gap-6">
             <span className="text-3xl font-bold text-background bg-primary size-20 flex items-center justify-center rounded-full">
               {userProfile.user.name[0]}
@@ -114,7 +114,7 @@ function Profile() {
       </div>
 
       <div className="container-box">
-        <div className="bg-background px-8 py-6 rounded-lg flex flex-col gap-8">
+        <div className="bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
           <h3 className="text-xl font-semibold">Статусы</h3>
 
           <Carousel
@@ -152,7 +152,7 @@ function Profile() {
               <CircleCheck className="size-8 text-primary" />
             )}
             <h2
-              className={`text-3xl font-bold ${isCurrentStatusReached || 'text-muted-foreground'}`}
+              className={`text-center text-2xl sm:text-3xl font-bold ${isCurrentStatusReached || 'text-muted-foreground'}`}
             >
               {USER_STATUSES[currentSlide]}
             </h2>
@@ -160,7 +160,7 @@ function Profile() {
 
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <span className="text-base font-medium text-muted-foreground">
+              <span className="text-sm sm:text-base font-medium text-muted-foreground">
                 До ранга "{nextStatus}"
               </span>
               <span className="text-base font-bold">
@@ -180,7 +180,7 @@ function Profile() {
       </div>
 
       <div className="container-box pb-12">
-        <div className="bg-background px-8 py-6 rounded-lg flex flex-col gap-8">
+        <div className="bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
           <h3 className="text-xl font-semibold">Таблица рейтинга</h3>
         </div>
       </div>
