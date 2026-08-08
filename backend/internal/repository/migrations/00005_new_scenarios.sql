@@ -5,11 +5,12 @@ BEGIN;
 -- ==========================================
 -- СЦЕНАРИЙ 5: Seller / Easy (Расширенный)
 -- ==========================================
-INSERT INTO scenarios (id, title, description, role, difficulty, required_scenarios_this_level, start_node_id)
+INSERT INTO scenarios (id, title, description, icon, role, difficulty, required_scenarios_this_level, start_node_id)
 VALUES (
            5,
            'Продажа старого смартфона',
            'Вы продаете свой прошлый телефон. Покупатель откликается почти сразу и пишет, что готов забрать товар, но предлагает изменить привычный порядок общения и оформления.',
+           'smartphone',
            'seller',
            'easy',
            2,
@@ -46,12 +47,13 @@ VALUES
 -- ==========================================
 -- СЦЕНАРИЙ 6: Seller / Hard (Расширенный)
 -- ==========================================
-INSERT INTO scenarios (id, title, description, role, difficulty, required_scenarios_this_level, start_node_id)
+INSERT INTO scenarios (id, title, description, icon, role, difficulty, required_scenarios_this_level, start_node_id)
 VALUES (
            6,
            'Продажа брендовой куртки',
            'Вы продаете дорогую куртку. Покупатель оформляет заказ через официальную доставку, но следом в чате появляется череда странных инструкций якобы от «системы безопасности».',
-           'seller',
+           'shirt',
+        'seller',
            'hard',
            2,
            NULL
@@ -89,12 +91,13 @@ VALUES
 -- ==========================================
 -- СЦЕНАРИЙ 7: Buyer / Easy (Расширенный)
 -- ==========================================
-INSERT INTO scenarios (id, title, description, role, difficulty, required_scenarios_this_level, start_node_id)
+INSERT INTO scenarios (id, title, description, icon, role, difficulty, required_scenarios_this_level, start_node_id)
 VALUES (
            7,
            'Покупка билетов на концерт',
            'Вы ищете билеты на долгожданное мероприятие, на которое уже раскуплены все официальные места. В ленте находится привлекательное предложение от частного лица.',
-           'buyer',
+           'ticket',
+        'buyer',
            'easy',
            2,
            NULL
@@ -131,12 +134,13 @@ VALUES
 -- ==========================================
 -- СЦЕНАРИЙ 8: Buyer / Hard (Расширенный)
 -- ==========================================
-INSERT INTO scenarios (id, title, description, role, difficulty, required_scenarios_this_level, start_node_id)
+INSERT INTO scenarios (id, title, description, icon, role, difficulty, required_scenarios_this_level, start_node_id)
 VALUES (
            8,
            'Покупка игрового ноутбука',
            'Вы нашли мощный ноутбук по отличной цене в соседнем городе. Продавец охотно идет на контакт, но предлагает нестандартную схему логистики и оплаты.',
-           'buyer',
+           'laptop',
+        'buyer',
            'hard',
            2,
            NULL

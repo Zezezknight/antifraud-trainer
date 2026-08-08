@@ -20,6 +20,7 @@ type Scenario struct {
 	ID                         int
 	Title                      string
 	Description                string
+	Icon                       string
 	Role                       Role
 	Difficulty                 Difficulty
 	BestScore                  *int

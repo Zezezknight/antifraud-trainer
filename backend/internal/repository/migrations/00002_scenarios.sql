@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS scenarios (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
+    icon TEXT NOT NULL,
     role VARCHAR(50) NOT NULL,
     difficulty VARCHAR(50) NOT NULL,
     required_scenarios_this_level INT NOT NULL DEFAULT 0,

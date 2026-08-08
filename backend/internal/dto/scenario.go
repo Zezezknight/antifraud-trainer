@@ -4,6 +4,7 @@ type Scenario struct {
 	ID                         int    `json:"id"`
 	Title                      string `json:"title"`
 	Description                string `json:"description"`
+	Icon                       string `json:"icon"`
 	Role                       string `json:"role"`
 	Difficulty                 string `json:"difficulty"`
 	BestScore                  *int   `json:"best_score"`

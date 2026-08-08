@@ -3,12 +3,13 @@
 BEGIN;
 
 -- 1. Создаем сам сценарий (пока без start_node_id)
-INSERT INTO scenarios (id, title, description, role, difficulty, required_scenarios_this_level, start_node_id)
+INSERT INTO scenarios (id, title, description, icon, role, difficulty, required_scenarios_this_level, start_node_id)
 VALUES (
            1,
            'Продажа умного пиксельного дисплея',
            'Вы продаете свой умный пиксельный дисплей Divoom Pixoo 64. Вы выложили объявление буквально 15 минут назад, и вам уже написал первый заинтересованный покупатель.',
-           'seller',
+           'monitor',
+        'seller',
            'easy',
            0,
            NULL
@@ -114,12 +115,13 @@ VALUES
 -- ============================
 -- Сценарий 2: Подтверждение продавца после оплаты заказа (seller / hard)
 -- ============================
-INSERT INTO scenarios (id, title, description, role, difficulty, required_scenarios_this_level, start_node_id)
+INSERT INTO scenarios (id, title, description, icon, role, difficulty, required_scenarios_this_level, start_node_id)
 VALUES (
            2,
            'Продажа графического планшета',
            'Вы выложили объявление о продаже своего графического планшета. Вскоре появляется покупатель, который сразу оформляет заказ, после чего в чате возникает сообщение от службы поддержки.',
-           'seller',
+           'tablet',
+        'seller',
            'hard',
            0,
            NULL
@@ -222,12 +224,13 @@ VALUES
 -- ============================
 -- Сценарий 3: Тот же товар чуть дешевле (buyer / easy)
 -- ============================
-INSERT INTO scenarios (id, title, description, role, difficulty, required_scenarios_this_level, start_node_id)
+INSERT INTO scenarios (id, title, description, icon, role, difficulty, required_scenarios_this_level, start_node_id)
 VALUES (
            3,
            'Покупка умной колонки',
            'Вы нашли объявление о продаже новой умной колонки по очень привлекательной цене. Вы пишете продавцу, чтобы убедиться, что товар в наличии, и перейти к оформлению покупки.',
-           'buyer',
+           'speaker',
+        'buyer',
            'easy',
            0,
            NULL
@@ -300,12 +303,13 @@ VALUES
      'red');
 
 -- 1. Сценарий №4 (Обновленный)
-INSERT INTO scenarios (id, title, description, role, difficulty, required_scenarios_this_level, start_node_id)
+INSERT INTO scenarios (id, title, description, icon, role, difficulty, required_scenarios_this_level, start_node_id)
 VALUES (
            4,
            'Покупка гравийного велосипеда',
            'Вы нашли отличный гравийный велосипед по привлекательной цене в соседнем регионе. Продавец охотно отвечает на вопросы, подтверждает идеальное состояние байка и готов отправлять его курьерской доставкой.',
-           'buyer',
+           'bike',
+        'buyer',
            'hard',
            0,
            NULL

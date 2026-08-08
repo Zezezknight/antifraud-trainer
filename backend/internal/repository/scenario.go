@@ -18,7 +18,7 @@ func NewScenarioRepository(db *sql.DB) *ScenarioRepository {
 
 func (r *ScenarioRepository) GetScenarios(ctx context.Context, role string) ([]*domain.Scenario, error) {
 	const query = `
-		SELECT id, title, description, role, difficulty, required_scenarios_this_level, start_node_id
+		SELECT id, title, description, icon, role, difficulty, required_scenarios_this_level, start_node_id
 		FROM scenarios
 		WHERE role = $1
 		ORDER BY id
@@ -38,7 +38,7 @@ func (r *ScenarioRepository) GetScenarios(ctx context.Context, role string) ([]*
 		var startNodeID sql.NullInt64
 
 		if err := rows.Scan(
-			&s.ID, &s.Title, &s.Description, &s.Role, &s.Difficulty, &s.RequiredScenariosThisLevel, &startNodeID,
+			&s.ID, &s.Title, &s.Description, &s.Icon, &s.Role, &s.Difficulty, &s.RequiredScenariosThisLevel, &startNodeID,
 		); err != nil {
 			return nil, fmt.Errorf("scan scenario: %w", err)
 		}
@@ -58,7 +58,7 @@ func (r *ScenarioRepository) GetScenarios(ctx context.Context, role string) ([]*
 
 func (r *ScenarioRepository) GetScenarioByID(ctx context.Context, scenarioID int) (*domain.Scenario, error) {
 	const query = `
-		SELECT id, title, description, role, difficulty, required_scenarios_this_level, start_node_id
+		SELECT id, title, description, icon, role, difficulty, required_scenarios_this_level, start_node_id
 		FROM scenarios
 		WHERE id = $1
 	`
@@ -67,7 +67,7 @@ func (r *ScenarioRepository) GetScenarioByID(ctx context.Context, scenarioID int
 	var startNodeID sql.NullInt64
 
 	err := r.DB.QueryRowContext(ctx, query, scenarioID).Scan(
-		&s.ID, &s.Title, &s.Description, &s.Role, &s.Difficulty, &s.RequiredScenariosThisLevel, &startNodeID,
+		&s.ID, &s.Title, &s.Description, &s.Icon, &s.Role, &s.Difficulty, &s.RequiredScenariosThisLevel, &startNodeID,
 	)
 
 	if errors.Is(err, sql.ErrNoRows) {
