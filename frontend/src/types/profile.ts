@@ -6,7 +6,23 @@ export const USER_STATUSES = [
   'Бдительный',
   'Эксперт безопасности',
 ] as const;
+
 export type UserStatus = (typeof USER_STATUSES)[number];
+
+export const USER_STATUS_CODES = USER_STATUSES.reduce(
+  (acc, status, index) => {
+    acc[status] = index;
+    return acc;
+  },
+  {} as Record<UserStatus, number>,
+);
+
+export const USER_STATUSES_START_POINTS: Record<UserStatus, number> = {
+  Новичок: 0,
+  Внимательный: 100,
+  Бдительный: 200,
+  'Эксперт безопасности': 300,
+};
 
 export const UserProfileResponse = z.object({
   user_id: z.string(),
