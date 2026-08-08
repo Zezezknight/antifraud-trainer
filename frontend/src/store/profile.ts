@@ -10,7 +10,3 @@ export const useUserProfileStore = create<UserProfileState>(set => ({
   profile: null,
   setProfile: profile => set(() => ({ profile })),
 }));
-
-export const useUserProfile = () => useUserProfileStore(state => state.profile);
-export const useSetUserProfile = () =>
-  useUserProfileStore(state => state.setProfile);
