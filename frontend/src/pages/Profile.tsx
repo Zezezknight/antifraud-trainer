@@ -12,6 +12,15 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel';
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
 import newbyeStatus from '/Новичок.png';
 import attentiveStatus from '/Внимательный.png';
 import vigilantStatus from '/Бдительный.png';
@@ -23,7 +32,8 @@ import {
   type UserStatus,
 } from '@/types/profile';
 import closedStatus from '/closed.png';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
+import { useUser } from '@/store/user';
 
 interface StatsCardProps {
   icon: React.JSX.Element;
@@ -43,14 +53,14 @@ function StatsCard({ icon, title, content }: StatsCardProps) {
 }
 
 function Profile() {
+  const user = useUser();
+
   const {
     profile: userProfile,
     leaderboard,
     buyer,
     seller,
   } = useLoaderData<ProfileLoader>();
-  console.log(leaderboard);
-
   const userPoints = userProfile.points;
   const userStatus = userProfile.status;
 
@@ -182,6 +192,59 @@ function Profile() {
       <div className="container-box pb-12">
         <div className="bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
           <h3 className="text-xl font-semibold">Таблица рейтинга</h3>
+
+          <Table className="text-sm border-separate border-spacing-y-1">
+            <TableHeader className="font-medium">
+              <TableRow className="flex items-center border-none rounded-2xl h-12">
+                <TableHead className="w-[20%] sm:w-[15%] pl-2 flex items-center">
+                  Место
+                </TableHead>
+                <TableHead className="w-[50%] sm:w-[55%] flex items-center">
+                  Пользователь
+                </TableHead>
+                <TableHead className="w-[30%] flex items-center justify-end">
+                  Очки
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {leaderboard
+                .sort((a, b) => a.rank - b.rank)
+                .map(row => (
+                  <Fragment key={row.rank}>
+                    {row.user.id === user?.id && row.rank > 4 ? (
+                      <TableRow className="hover:bg-transparent">
+                        <TableCell className="w-full text-xl font-bold text-muted-foreground text-center">
+                          ...
+                        </TableCell>
+                      </TableRow>
+                    ) : null}
+                    <TableRow
+                      className={`flex items-center rounded-2xl ${
+                        row.user.id === user?.id
+                          ? 'bg-primary/10 border! border-primary hover:bg-primary/20'
+                          : 'border border-transparent'
+                      }`}
+                    >
+                      <TableCell className="w-[20%] sm:w-[15%] pl-6 font-medium">
+                        {row.rank}
+                      </TableCell>
+                      <TableCell className="w-[50%] sm:w-[55%] flex flex-col">
+                        <span className="font-semibold">
+                          {row.user.name} {row.user.id === user?.id && '(вы)'}
+                        </span>
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {row.status}
+                        </span>
+                      </TableCell>
+                      <TableCell className="w-[30%] font-bold text-right">
+                        {row.points}
+                      </TableCell>
+                    </TableRow>
+                  </Fragment>
+                ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </>
