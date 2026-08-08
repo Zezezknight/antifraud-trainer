@@ -18,8 +18,10 @@ export const UserProfileResponse = z.object({
 });
 
 export const UserProfileSchema = UserProfileResponse.transform(data => ({
-  userId: data.user_id,
-  username: data.username,
+  user: {
+    id: data.user_id,
+    name: data.username,
+  },
   points: data.points,
   status: data.status,
   completedEasyScenarios: data.completed_easy_scenarios,
