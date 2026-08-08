@@ -1,8 +1,15 @@
 import type { Scenario } from '@/types/scenarios';
-import { Phone, CircleStar, ArrowRight, BanIcon } from 'lucide-react';
-import IconInCircle from '../IconInCircle';
+import {
+  CircleStar,
+  ArrowRight,
+  Ban,
+  Store,
+  ShoppingCart,
+} from 'lucide-react';
+import { DynamicIcon, type IconName } from 'lucide-react/dynamic'; 
 import { Button } from '../ui/button';
 import { Link } from 'react-router';
+import IconInCircle from '../IconInCircle';
 
 interface ScenarioCardProps {
   scenario: Scenario;
@@ -25,7 +32,17 @@ function ScenarioCard({ scenario }: ScenarioCardProps) {
     >
       <div className="flex items-start justify-between px-4">
         <IconInCircle
-          icon={available ? <Phone className="text-primary" /> : <BanIcon />}
+          icon={
+            available ? (
+              <DynamicIcon
+                name={scenario.icon as IconName}
+                className="text-primary"
+                fallback={() => scenario.role === 'seller' ? <ShoppingCart /> : <Store />}
+              />
+            ) : (
+              <Ban />
+            )
+          }
           variants="lg"
           backgroundColor={available ? 'bg-primary/20' : 'bg-muted'}
         />
