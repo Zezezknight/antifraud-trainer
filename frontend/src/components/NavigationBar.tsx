@@ -1,11 +1,17 @@
 import logo from '@/assets/avito-antifraud-logo-dark.svg';
 import { Link } from 'react-router';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import type { UserStatus } from '@/types/profile';
 
-function NavigationBar() {
+interface NavigationBarProps {
+  points: number;
+  status: UserStatus;
+}
+
+function NavigationBar({ points, status }: NavigationBarProps) {
   return (
     <div className="bg-muted shadow-sm py-4">
-      <div className="container m-auto px-8 flex justify-between items-center">
+      <div className="container-box flex justify-between items-center">
         <Link to="/">
           <img
             src={logo}
@@ -18,14 +24,14 @@ function NavigationBar() {
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl border-2 border-border bg-background"
         >
           <div className="flex flex-col items-end">
-            <span className="text-base font-bold">60</span>
+            <span className="text-base font-bold">{points}</span>
             <span className="text-xs font-medium text-muted-foreground">
-              Новичок
+              {status}
             </span>
           </div>
           <Avatar size="lg">
-            <AvatarImage src="/1.png" />
-            <AvatarFallback>Новичок</AvatarFallback>
+            <AvatarImage src={`/${status}.png`} />
+            <AvatarFallback>{status}</AvatarFallback>
           </Avatar>
         </Link>
       </div>

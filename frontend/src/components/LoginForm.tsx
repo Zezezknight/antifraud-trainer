@@ -48,15 +48,11 @@ export function LoginForm() {
     setError(null);
 
     try {
-      const userResponse = await loginUser({
+      const user = await loginUser({
         username: loginData.login,
         password: loginData.password,
       });
-      setUser({
-        token: userResponse.token,
-        id: userResponse.user.user_id,
-        name: userResponse.user.username,
-      });
+      setUser(user);
       await navigate('/');
     } catch (error) {
       if (error instanceof z.ZodError) {

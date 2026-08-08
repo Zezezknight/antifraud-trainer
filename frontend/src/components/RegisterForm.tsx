@@ -55,15 +55,11 @@ export function RegisterForm() {
     }
 
     try {
-      const userResponse = await registerUser({
+      const user = await registerUser({
         username: registerData.login,
         password: registerData.password,
       });
-      setUser({
-        token: userResponse.token,
-        id: userResponse.user.user_id,
-        name: userResponse.user.username,
-      });
+      setUser(user);
       await navigate('/');
     } catch (error) {
       if (error instanceof z.ZodError) {

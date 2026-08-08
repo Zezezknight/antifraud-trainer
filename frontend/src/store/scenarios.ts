@@ -23,5 +23,3 @@ export const useScenariosStore = create<ScenariosState>(set => ({
 }));
 
 export const useScenarios = () => useScenariosStore(state => state.scenarios);
-export const useSetScenarios = () =>
-  useScenariosStore(state => state.setScenarios);

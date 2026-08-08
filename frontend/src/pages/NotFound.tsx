@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 function NotFoundPage() {
   return (
     <main className="bg-primary min-h-screen flex justify-center py-12 text-background relative">
-      <div className="container px-8">
+      <div className="container-box">
         <img
           src={logo}
           alt="Avito-Antifraud Logo"

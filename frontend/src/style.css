@@ -138,3 +138,7 @@
     @apply font-sans;
   }
 }
+
+@utility container-box {
+  @apply container mx-auto px-8;
+}
