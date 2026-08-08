@@ -8,6 +8,8 @@ import { LoginForm } from './components/LoginForm';
 import Auth from './layouts/Auth';
 import { RegisterForm } from './components/RegisterForm';
 import { homeLoader } from './loaders/home';
+import Profile from './pages/Profile';
+import { profileLoader } from './loaders/profile';
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +24,11 @@ export const router = createBrowserRouter([
             index: true, // Главная страница (/)
             element: <Home />,
             loader: homeLoader,
+          },
+          {
+            path: '/profile',
+            element: <Profile />,
+            loader: profileLoader,
           },
         ],
       },
