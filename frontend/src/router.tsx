@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, redirect } from 'react-router';
 import Main from './layouts/Main';
 import NotFoundPage from './pages/NotFound';
 import ProtectedRoutes from './components/ProtectedRoutes';
@@ -10,6 +10,7 @@ import { RegisterForm } from './components/RegisterForm';
 import { homeLoader } from './loaders/home';
 import Profile from './pages/Profile';
 import { profileLoader } from './loaders/profile';
+import { getTokenFromLocalStorage, isTokenExpired } from '@/utils/auth';
 
 export const router = createBrowserRouter([
   {
@@ -19,6 +20,17 @@ export const router = createBrowserRouter([
       {
         // Защищенный сектор сайта (требуется авторизация пользователя)
         element: <ProtectedRoutes />,
+        loader: () => {
+          const token = getTokenFromLocalStorage();
+          const isExpired = isTokenExpired(token);
+
+          // Если токена нет или он просрочен, прерываем цепочку и редиректим
+          if (!token || isExpired) {
+            return redirect('/login');
+          }
+
+          return null; // Пропускаем дальше к дочерним лоадерам
+        },
         children: [
           {
             index: true, // Главная страница (/)
