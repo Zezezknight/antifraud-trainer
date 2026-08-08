@@ -14,14 +14,14 @@ function Home() {
   return (
     <>
       <NavigationBar points={userProfile.points} status={userProfile.status} />
-      <div className="container mx-auto px-8 flex flex-col gap-4 sm:gap-8">
+      <div className="container-box flex flex-col gap-4 sm:gap-8">
         <h1 className="text-3xl sm:text-4xl font-bold">Выберите сценарий</h1>
         <p className="text-md sm:text-lg md:w-3/4 lg:w-1/2">
           Пройдите переписку от лица продавца или покупателя. Зона риска заранее
           не раскрывается — будьте внимательны в моменте.
         </p>
       </div>
-      <div className="container mx-auto px-8 pb-12">
+      <div className="container-box pb-12">
         <Tabs defaultValue="seller">
           <TabsList className="w-full flex items-center bg-muted border-2 border-border mb-8">
             <TabsTrigger className="cursor-pointer" value="seller">

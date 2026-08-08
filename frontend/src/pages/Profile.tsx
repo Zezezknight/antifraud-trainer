@@ -33,7 +33,8 @@ function Profile() {
   return (
     <>
       <NavigationBar points={userProfile.points} status={userProfile.status} />
-      <div className="container px-8 mx-auto">
+
+      <div className="container-box">
         <div className="bg-background px-8 py-6 rounded-lg flex flex-col gap-8">
           <div className="flex items-center gap-6">
             <span className="text-3xl font-bold text-background bg-primary size-20 flex items-center justify-center rounded-full">
@@ -56,6 +57,8 @@ function Profile() {
           </div>
         </div>
       </div>
+
+      <div className="container-box"></div>
     </>
   );
 }

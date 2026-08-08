@@ -11,7 +11,7 @@ interface NavigationBarProps {
 function NavigationBar({ points, status }: NavigationBarProps) {
   return (
     <div className="bg-muted shadow-sm py-4">
-      <div className="container m-auto px-8 flex justify-between items-center">
+      <div className="container-box flex justify-between items-center">
         <Link to="/">
           <img
             src={logo}
