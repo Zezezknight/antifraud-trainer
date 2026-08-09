@@ -24,8 +24,9 @@ export function scenariosLoader<R extends Role>(
 ): Promise<Scenario<R>[]> {
   return createCachedLoader<Scenario<R>[]>({
     getSnapshot: () => {
-      const { scenarios } = useScenariosStore.getState();
-      return scenarios[role].length > 0 ? scenarios[role] : null;
+      const state = useScenariosStore.getState();
+      // Возвращаем данные только если полный список был загружен
+      return state.isFullyLoaded[role] ? state.scenarios[role] : null;
     },
     setSnapshot: value => {
       useScenariosStore.getState().setScenarios(role, value);
