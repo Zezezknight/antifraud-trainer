@@ -140,5 +140,5 @@
 }
 
 @utility container-box {
-  @apply container mx-auto px-8;
+  @apply container mx-auto px-4 sm:px-8;
 }
