@@ -92,8 +92,7 @@ function Profile() {
   const nextStatus: UserStatus =
     USER_STATUSES[USER_STATUS_CODES[userStatus] + 1] ?? USER_STATUSES.at(-1);
   const pointsForNextStatus =
-    USER_STATUSES_START_POINTS[nextStatus] -
-    USER_STATUSES_START_POINTS[userStatus];
+    USER_STATUSES_START_POINTS[nextStatus] - userPoints;
 
   return (
     <>
