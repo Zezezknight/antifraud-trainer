@@ -1,0 +1,671 @@
+openapi: 3.0.3
+info:
+  title: Антискам тренажер
+  version: 1.0.0
+  description: Обучающее веб-приложение в формате интерактивного тренажера безопасных сделок
+
+paths:
+  /api/auth/register:
+    post:
+      summary: Регистрация нового пользователя
+      description: Принимает учетные данные, создает пользователя и возвращает JWT-токен.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Успешная регистрация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Ошибки клиентского запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                InvalidJson:
+                  summary: Некорректный JSON
+                  value:
+                    code: "INVALID JSON"
+                    message: "некорректный формат данных"
+                UsernameTooShort:
+                  summary: Слишком короткое имя пользователя
+                  value:
+                    code: "BAD REQUEST"
+                    message: "имя пользователя должно содержать не менее 3 символов"
+                PasswordTooShort:
+                  summary: Слишком короткий пароль
+                  value:
+                    code: "BAD REQUEST"
+                    message: "пароль должен быть не менее 6 символов"
+
+        '409':
+          description: Пользователь с таким именем уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "CONFLICT"
+                message: "пользователь с таким именем уже существует"
+
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      summary: Вход в систему
+      description: Проверяет логин/пароль и возвращает JWT-токен.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Ошибки клиентского запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                InvalidJson:
+                  summary: Некорректный JSON
+                  value:
+                    code: "INVALID JSON"
+                    message: "некорректный формат данных"
+                InvalidCredentials:
+                  summary: Неверный логин или пароль
+                  value:
+                    code: "INVALID CREDENTIALS"
+                    message: "неверный логин или пароль"
+
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/users/me:
+    get:
+      summary: Получить данные о текущем пользователе
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Информация о пользователе
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "NOT FOUND"
+                message: "ресурс не найден"
+
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+  /api/scenarios:
+    get:
+      summary: Получить список доступных сценариев
+      tags:
+        - Scenarios
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: role
+          in: query
+          required: false
+          description: Фильтр по роли пользователя (buyer / seller)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список доступных сценариев
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Scenario'
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/scenarios/{id}:
+    get:
+      summary: Получить информацию о сценарии по ID
+      tags:
+        - Scenarios
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScenarioID'
+      responses:
+        '200':
+          description: Информация о сценарии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scenario'
+        '400':
+          description: Некорректный ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "BAD REQUEST"
+                message: "некорректный ID"
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+        '404':
+          description: Сценарий не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "NOT FOUND"
+                message: "ресурс не найден"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/scenarios/{id}/start:
+    get:
+      summary: Запустить сценарий (получить стартовый узел)
+      tags:
+        - Scenarios
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScenarioID'
+      responses:
+        '200':
+          description: Данные первого узла и варианты ответа
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StepResponse'
+        '400':
+          description: Некорректный ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "BAD REQUEST"
+                message: "некорректный ID"
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+        '404':
+          description: Сценарий не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "NOT FOUND"
+                message: "ресурс не найден"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/scenarios/{id}/step:
+    post:
+      summary: Совершить шаг в сценарии
+      tags:
+        - Scenarios
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScenarioID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StepRequest'
+      responses:
+        '200':
+          description: Данные следующего узла и варианты ответа
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StepResponse'
+        '400':
+          description: Некорректные данные запроса или JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "BAD REQUEST"
+                message: "некорректный формат данных"
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+        '404':
+          description: Сценарий не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "NOT FOUND"
+                message: "ресурс не найден"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/scenarios/{id}/finish:
+    post:
+      summary: Завершить сценарий и сохранить результат
+      tags:
+        - Scenarios
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScenarioID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResultRequest'
+      responses:
+        '204':
+          description: Результат успешно сохранен
+        '400':
+          description: Некорректные данные запроса или JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "BAD REQUEST"
+                message: "некорректный формат данных"
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+        '404':
+          description: Сценарий не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "NOT FOUND"
+                message: "ресурс не найден"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/leaderboard:
+    get:
+      summary: Получить таблицу лидеров
+      tags:
+        - Leaderboard
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Список пользователей в лидерборде
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntry'
+        '401':
+          description: Ошибка авторизации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    ScenarioID:
+      name: id
+      in: path
+      required: true
+      description: Идентификатор сценария
+      schema:
+        type: integer
+
+  schemas:
+    AuthRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: "johndoe"
+        password:
+          type: string
+          format: password
+          example: "secret123"
+
+    AuthResponse:
+      type: object
+      required:
+        - token
+        - user
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      required:
+        - user_id
+        - username
+        - points
+        - status
+        - completed_easy_scenarios
+        - completed_hard_scenarios
+      properties:
+        user_id:
+          type: string
+          example: "507f1f77bcf86cd799439011"
+        username:
+          type: string
+          example: "johndoe"
+        points:
+          type: integer
+          example: 100
+        status:
+          type: string
+          example: "Новичок"
+        completed_easy_scenarios:
+          type: integer
+          example: 1
+        completed_hard_scenarios:
+          type: integer
+          example: 1
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "INTERNAL ERROR"
+        message:
+          type: string
+          example: "внутренняя ошибка сервера"
+
+    Scenario:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - role
+        - best_score
+        - required_scenarios_this_level
+        - difficulty
+        - is_available
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Продажа умного пиксельного дисплея"
+        description:
+          type: string
+          example: "Вы продаете свой умный пиксельный дисплей Divoom Pixoo 64. Вы выложили объявление буквально 15 минут назад, и вам уже написал первый заинтересованный покупатель."
+        role:
+          type: string
+          example: "seller"
+        difficulty:
+          type: string
+          example: "easy"
+        required_scenarios_this_level:
+          type: integer
+        is_available:
+          type: boolean
+          example: true
+        best_score:
+          type: integer
+          example: 50
+
+    ScenarioNode:
+      type: object
+      required:
+        - id
+        - scenario_id
+        - message_text
+        - is_final
+        - final_status
+      properties:
+        id:
+          type: integer
+          example: 1
+        scenario_id:
+          type: integer
+          example: 1
+        message_text:
+          type: string
+          example: "Добрый день! Очень давно искал именно эту модель, хочу настроить кастомные анимации и циклы. Состояние рабочее? Готов сейчас же оформить доставку."
+        is_final:
+          type: boolean
+          example: false
+        final_status:
+          type: string
+          example: ""
+
+    ScenarioOption:
+      type: object
+      required:
+        - id
+        - from_node_id
+        - to_node_id
+        - how_to_recognize_in_life
+        - feedback_text
+        - message_text
+        - status
+      properties:
+        id:
+          type: integer
+          example: 1
+        from_node_id:
+          type: integer
+          example: 1
+        to_node_id:
+          type: integer
+          example: 2
+        message_text:
+          type: string
+          example: "Да, состояние идеальное. Оформляйте доставку в приложении."
+        feedback_text:
+          type: string
+          example: "Отличное начало! Вы переводите покупателя на официальный способ доставки."
+        how_to_recognize_in_life:
+          type: string
+          example: "Мошенники часто пытаются увести диалог в сторонние мессенджеры. Всегда настаивайте на оформлении внутри официального приложения."
+        status:
+          type: string
+          example: "green"
+
+    StepRequest:
+      type: object
+      required:
+        - option_id
+      properties:
+        option_id:
+          type: integer
+          example: 1
+
+    StepResponse:
+      type: object
+      required:
+        - scenario_node
+        - options
+      properties:
+        scenario_node:
+          $ref: '#/components/schemas/ScenarioNode'
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScenarioOption'
+
+    ResultRequest:
+      type: object
+      required:
+        - score
+        - status
+      properties:
+        score:
+          type: integer
+          example: 100
+        status:
+          type: string
+          example: "green"
+
+    LeaderboardEntry:
+      type: object
+      required:
+        - rank
+        - user_id
+        - username
+        - points
+        - status
+      properties:
+        rank:
+          type: integer
+          example: 1
+        user_id:
+          type: string
+          example: "507f1f77bcf86cd799439011"
+        username:
+          type: string
+          example: "johndoe"
+        points:
+          type: integer
+          example: 100
+        status:
+          type: string
+          example: "Бдительный"
