@@ -54,3 +54,5 @@ export const DialogSchema = z
   }));
 
 export type Dialog = z.infer<typeof DialogSchema>;
+
+export type DialogMessageType = 'opponent' | 'user';
