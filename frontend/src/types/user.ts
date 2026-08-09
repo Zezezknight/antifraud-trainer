@@ -1,18 +1,18 @@
 import * as z from 'zod';
 
-export const UserResponse = z.object({
-  token: z.string(),
-  user: z.object({
-    user_id: z.string(),
-    username: z.string(),
-  }),
-});
-
-export const UserSchema = UserResponse.transform(data => ({
-  token: data.token,
-  id: data.user.user_id,
-  name: data.user.username,
-}));
+export const UserSchema = z
+  .object({
+    token: z.string(),
+    user: z.object({
+      user_id: z.string(),
+      username: z.string(),
+    }),
+  })
+  .transform(data => ({
+    token: data.token,
+    id: data.user.user_id,
+    name: data.user.username,
+  }));
 
 export type User = z.infer<typeof UserSchema>;
 

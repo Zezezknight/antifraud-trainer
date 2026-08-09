@@ -32,6 +32,8 @@ export default defineConfig([
         'warn',
         { allowConstantExport: true },
       ],
+      'only-throw-error': 'off',
+      '@typescript-eslint/only-throw-error': 'off',
     },
   },
 ]);

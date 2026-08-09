@@ -24,24 +24,24 @@ export const USER_STATUSES_START_POINTS: Record<UserStatus, number> = {
   'Эксперт безопасности': 300,
 };
 
-export const UserProfileResponse = z.object({
-  user_id: z.string(),
-  username: z.string(),
-  points: z.number(),
-  status: z.enum(USER_STATUSES),
-  completed_easy_scenarios: z.number(),
-  completed_hard_scenarios: z.number(),
-});
-
-export const UserProfileSchema = UserProfileResponse.transform(data => ({
-  user: {
-    id: data.user_id,
-    name: data.username,
-  },
-  points: data.points,
-  status: data.status,
-  completedEasyScenarios: data.completed_easy_scenarios,
-  completedHardScenarios: data.completed_hard_scenarios,
-}));
+export const UserProfileSchema = z
+  .object({
+    user_id: z.string(),
+    username: z.string(),
+    points: z.number(),
+    status: z.enum(USER_STATUSES),
+    completed_easy_scenarios: z.number(),
+    completed_hard_scenarios: z.number(),
+  })
+  .transform(data => ({
+    user: {
+      id: data.user_id,
+      name: data.username,
+    },
+    points: data.points,
+    status: data.status,
+    completedEasyScenarios: data.completed_easy_scenarios,
+    completedHardScenarios: data.completed_hard_scenarios,
+  }));
 
 export type UserProfile = z.infer<typeof UserProfileSchema>;
