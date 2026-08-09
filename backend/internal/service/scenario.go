@@ -148,9 +148,9 @@ func (s *ScenarioService) SaveScenarioResult(
 	case user.Points >= 300:
 		newStatus = "Эксперт безопасности"
 	case user.Points >= 200:
-		newStatus = "Внимательный"
-	case user.Points >= 100:
 		newStatus = "Бдительный"
+	case user.Points >= 100:
+		newStatus = "Внимательный"
 	default:
 		newStatus = "Новичок"
 	}

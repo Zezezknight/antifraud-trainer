@@ -205,12 +205,12 @@ func TestScenarioService_SaveScenarioResult(t *testing.T) {
 		user, err := repo.GetUserByID(ctx, "user-1")
 		require.NoError(t, err)
 		assert.Equal(t, 100, user.Points)
-		assert.Equal(t, "Бдительный", user.Status)
+		assert.Equal(t, "Внимательный", user.Status)
 		assert.Equal(t, 1, user.CompletedEasyScenarios)
 	})
 
 	t.Run("save better result and update status", func(t *testing.T) {
-		// 200 очков -> статус "Внимательный"
+		// 200 очков -> статус "Бдительный"
 		// Тот же сценарий, но больше очков
 		err := svc.SaveScenarioResult(ctx, "user-1", 1, 200, "green", "easy")
 		require.NoError(t, err)
@@ -218,7 +218,7 @@ func TestScenarioService_SaveScenarioResult(t *testing.T) {
 		user, err := repo.GetUserByID(ctx, "user-1")
 		require.NoError(t, err)
 		assert.Equal(t, 200, user.Points)
-		assert.Equal(t, "Внимательный", user.Status)
+		assert.Equal(t, "Бдительный", user.Status)
 		assert.Equal(t, 1, user.CompletedEasyScenarios, "count shouldn't double for same scenario")
 	})
 
@@ -230,7 +230,7 @@ func TestScenarioService_SaveScenarioResult(t *testing.T) {
 		user, err := repo.GetUserByID(ctx, "user-1")
 		require.NoError(t, err)
 		assert.Equal(t, 200, user.Points, "points should remain 200")
-		assert.Equal(t, "Внимательный", user.Status)
+		assert.Equal(t, "Бдительный", user.Status)
 	})
 
 	t.Run("user not found", func(t *testing.T) {
