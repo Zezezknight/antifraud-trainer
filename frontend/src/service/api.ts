@@ -1,5 +1,5 @@
 import axios, { AxiosHeaders } from 'axios';
-import { getAuthToken } from '@/store/user';
+import { getAuthToken, clearUser, AUTH_STORAGE_KEY } from '@/store/user';
 import { getTokenFromLocalStorage } from '@/utils/auth';
 
 const api = axios.create({
@@ -19,5 +19,21 @@ api.interceptors.request.use(config => {
 
   return config;
 });
+
+// Обработка ошибок 401 (токен истёк или невалиден)
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      clearUser();
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      window.location.href = '/login';
+    }
+
+    return Promise.reject(
+      error instanceof Error ? error : new Error(String(error)),
+    );
+  },
+);
 
 export default api;
