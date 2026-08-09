@@ -9,8 +9,12 @@ import { createCachedLoader } from './utils';
 import type { Leaderboard } from '@/types/leaderboard';
 import { useLeaderboardStore } from '@/store/leaderboard';
 import { getLeaderboard } from '@/service/leaderboard';
+import { checkTokenValidity } from '@/utils/auth';
 
 export function userProfileLoader(): Promise<UserProfile> {
+  const tokenCheck = checkTokenValidity();
+  if (tokenCheck) throw tokenCheck;
+
   return createCachedLoader<UserProfile>({
     getSnapshot: () => useUserProfileStore.getState().profile,
     setSnapshot: profile => useUserProfileStore.getState().setProfile(profile),
@@ -22,6 +26,9 @@ export function userProfileLoader(): Promise<UserProfile> {
 export function scenariosLoader<R extends Role>(
   role: R,
 ): Promise<Scenario<R>[]> {
+  const tokenCheck = checkTokenValidity();
+  if (tokenCheck) throw tokenCheck;
+
   return createCachedLoader<Scenario<R>[]>({
     getSnapshot: () => {
       const state = useScenariosStore.getState();
@@ -42,6 +49,9 @@ export function scenarioLoader(scenarioId: number) {
     throw new Response('Not Found', { status: 404 });
   }
 
+  const tokenCheck = checkTokenValidity();
+  if (tokenCheck) throw tokenCheck;
+
   return createCachedLoader({
     getSnapshot: () => {
       const { buyer, seller } = useScenariosStore.getState().scenarios;
@@ -61,6 +71,9 @@ export function scenarioLoader(scenarioId: number) {
 }
 
 export function leaderboardLoader(): Promise<Leaderboard[]> {
+  const tokenCheck = checkTokenValidity();
+  if (tokenCheck) throw tokenCheck;
+
   return createCachedLoader({
     getSnapshot: () => {
       const { leaderboard } = useLeaderboardStore.getState();
