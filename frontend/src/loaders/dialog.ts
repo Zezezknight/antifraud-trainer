@@ -1,10 +1,12 @@
 import type { Scenario } from '@/types/scenarios';
 import { composeLoaders } from './utils';
-import { scenarioLoader } from './loaders';
+import { dialogStartLoader, scenarioLoader } from './loaders';
 import type { LoaderFunctionArgs } from 'react-router';
+import type { Dialog } from '@/types/dialog';
 
 export interface DialogLoader {
   scenario: Scenario;
+  dialogStart: Dialog;
 }
 
 export function dialogLoader({
@@ -15,5 +17,6 @@ export function dialogLoader({
 
   return composeLoaders({
     scenario: () => scenarioLoader(scenarioId),
+    dialogStart: () => dialogStartLoader(scenarioId),
   });
 }

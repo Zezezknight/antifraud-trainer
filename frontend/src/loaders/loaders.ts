@@ -10,6 +10,9 @@ import type { Leaderboard } from '@/types/leaderboard';
 import { useLeaderboardStore } from '@/store/leaderboard';
 import { getLeaderboard } from '@/service/leaderboard';
 import { checkTokenValidity } from '@/utils/auth';
+import { getDialogStart } from '@/service/dialog';
+import axios from 'axios';
+import type { Dialog } from '@/types/dialog';
 
 export function userProfileLoader(): Promise<UserProfile> {
   const tokenCheck = checkTokenValidity();
@@ -44,7 +47,7 @@ export function scenariosLoader<R extends Role>(
   })();
 }
 
-export function scenarioLoader(scenarioId: number) {
+export function scenarioLoader(scenarioId: number): Promise<Scenario> {
   if (!Number.isFinite(scenarioId)) {
     throw new Response('Not Found', { status: 404 });
   }
@@ -65,9 +68,43 @@ export function scenarioLoader(scenarioId: number) {
     onError: error => {
       console.error(`Ошибка загрузки сценария с ID=${scenarioId}:`, error);
     },
-  })().catch(() => {
+  })()
+    .then(scenario => {
+      if (!scenario.isAvailable) {
+        console.log(`Сценарий с ID=${scenario.id} не доступен`);
+        throw new Response('Scenario not available', { status: 403 });
+      }
+
+      return scenario;
+    })
+    .catch(error => {
+      if (error instanceof Response) {
+        throw error;
+      }
+
+      throw new Response('Not Found', { status: 404 });
+    });
+}
+
+export async function dialogStartLoader(scenarioId: number): Promise<Dialog> {
+  if (!Number.isFinite(scenarioId)) {
     throw new Response('Not Found', { status: 404 });
-  });
+  }
+
+  const tokenCheck = checkTokenValidity();
+  if (tokenCheck) throw tokenCheck;
+
+  try {
+    return await getDialogStart(scenarioId);
+  } catch (error) {
+    console.error(`Ошибка начала сценария с ID=${scenarioId}:`, error);
+
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      throw new Response('Not Found', { status: 404 });
+    }
+
+    throw new Response('Internal Server Error', { status: 500 });
+  }
 }
 
 export function leaderboardLoader(): Promise<Leaderboard[]> {
