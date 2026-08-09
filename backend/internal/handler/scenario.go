@@ -102,7 +102,7 @@ func (h *ScenarioHandler) GetScenarioByID(w http.ResponseWriter, r *http.Request
 }
 
 func (h *ScenarioHandler) StartScenario(w http.ResponseWriter, r *http.Request) {
-	_, err := userctx.GetUserID(r.Context())
+	userID, err := userctx.GetUserID(r.Context())
 	if err != nil {
 		writeError(w, http.StatusUnauthorized, CodeUnauthorized, MessageUnauthorized, err)
 		return
@@ -114,7 +114,17 @@ func (h *ScenarioHandler) StartScenario(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	startNode, err := h.scenarioService.GetNodeByID(r.Context(), scenarioID)
+	scenario, err := h.scenarioService.GetScenarioByID(r.Context(), scenarioID, userID)
+	if err != nil {
+		if errors.Is(err, domain.ErrScenarioNotFound) {
+			writeError(w, http.StatusNotFound, CodeNotFound, MessageNotFound, err)
+			return
+		}
+		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
+		return
+	}
+
+	startNode, err := h.scenarioService.GetNodeByID(r.Context(), scenario.StartNodeID)
 	if err != nil {
 		if errors.Is(err, domain.ErrScenarioNodeNotFound) {
 			writeError(w, http.StatusNotFound, CodeNotFound, MessageNotFound, err)
