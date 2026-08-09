@@ -1,12 +1,18 @@
 import * as z from 'zod';
 
+const OPTION_STATUSES = ['green', 'yellow', 'red'] as const;
+export type OptionStatus = (typeof OPTION_STATUSES)[number];
+
+const OPTION_FINAL_STATUSES = ['green', 'yellow', 'red', ''] as const;
+export type OptionFinalStatus = (typeof OPTION_FINAL_STATUSES)[number];
+
 export const DialogNodeSchema = z
   .object({
     id: z.number(),
     scenario_id: z.number(),
     message_text: z.string(),
     is_final: z.boolean(),
-    final_status: z.string(),
+    final_status: z.enum(OPTION_FINAL_STATUSES),
   })
   .transform(data => ({
     id: data.id,
@@ -17,9 +23,6 @@ export const DialogNodeSchema = z
   }));
 
 export type DialogNode = z.infer<typeof DialogNodeSchema>;
-
-const OPTION_STATUSES = ['green', 'yellow', 'red'] as const;
-export type OptionStatus = (typeof OPTION_STATUSES)[number];
 
 export const DialogOptionSchema = z
   .object({
@@ -56,3 +59,9 @@ export const DialogSchema = z
 export type Dialog = z.infer<typeof DialogSchema>;
 
 export type DialogMessageType = 'opponent' | 'user';
+
+export const FINAL_SCORE: Record<OptionStatus, number> = {
+  green: 100,
+  yellow: 50,
+  red: 0,
+};
