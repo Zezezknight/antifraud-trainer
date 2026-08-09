@@ -1,7 +1,7 @@
 import { getUserProfile } from '@/service/profile';
 import { useUserProfileStore } from '@/store/profile';
 import type { UserProfile } from '@/types/profile';
-import { getScenarios } from '@/service/scenarios';
+import { getScenarioById, getScenarios } from '@/service/scenarios';
 import { useScenariosStore } from '@/store/scenarios';
 import type { Scenario, Role } from '@/types/scenarios';
 
@@ -35,6 +35,29 @@ export function scenariosLoader<R extends Role>(
     onError: error =>
       console.error(`Ошибка загрузки сценариев (${role}):`, error),
   })();
+}
+
+export function scenarioLoader(scenarioId: number) {
+  if (!Number.isFinite(scenarioId)) {
+    throw new Response('Not Found', { status: 404 });
+  }
+
+  return createCachedLoader({
+    getSnapshot: () => {
+      const { buyer, seller } = useScenariosStore.getState().scenarios;
+      const allScenarios = [...buyer, ...seller];
+      return allScenarios.find(scenario => scenario.id === scenarioId) ?? null;
+    },
+    setSnapshot: value => {
+      useScenariosStore.getState().addScenario(value.role, value);
+    },
+    fetcher: () => getScenarioById(scenarioId),
+    onError: error => {
+      console.error(`Ошибка загрузки сценария с ID=${scenarioId}:`, error);
+    },
+  })().catch(() => {
+    throw new Response('Not Found', { status: 404 });
+  });
 }
 
 export function leaderboardLoader(): Promise<Leaderboard[]> {
