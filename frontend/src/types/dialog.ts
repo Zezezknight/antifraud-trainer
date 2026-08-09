@@ -18,7 +18,7 @@ export const DialogNodeSchema = z
 
 export type DialogNode = z.infer<typeof DialogNodeSchema>;
 
-const OPTION_STATUSES = ['green', 'orange', 'red'] as const;
+const OPTION_STATUSES = ['green', 'yellow', 'red'] as const;
 export type OptionStatus = (typeof OPTION_STATUSES)[number];
 
 export const DialogOptionSchema = z
