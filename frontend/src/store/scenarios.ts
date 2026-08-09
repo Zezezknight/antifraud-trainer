@@ -9,6 +9,7 @@ interface ScenariosState {
   isFullyLoaded: Record<Role, boolean>;
   setScenarios: <R extends Role>(role: R, scenarios: Scenario<R>[]) => void;
   addScenario: <R extends Role>(role: R, scenario: Scenario<R>) => void;
+  invalidateRole: (role: Role) => void;
 }
 
 export const useScenariosStore = create<ScenariosState>(set => ({
@@ -46,8 +47,17 @@ export const useScenariosStore = create<ScenariosState>(set => ({
         },
       };
     }),
+  invalidateRole: role =>
+    set(state => ({
+      isFullyLoaded: {
+        ...state.isFullyLoaded,
+        [role]: false,
+      },
+    })),
 }));
 
 export const useScenarios = () => useScenariosStore(state => state.scenarios);
 export const useSetScenarios = () =>
   useScenariosStore(state => state.setScenarios);
+export const useInvalidateRole = () =>
+  useScenariosStore(state => state.invalidateRole);

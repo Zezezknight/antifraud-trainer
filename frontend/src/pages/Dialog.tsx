@@ -9,6 +9,8 @@ import {
 } from '@/types/dialog';
 import DialogMessage from '@/components/Dialog/DialogMessage';
 import { getDialogStep, sendDialogResults } from '@/service/dialog';
+import { useInvalidateRole } from '@/store/scenarios';
+import { useSetProfile } from '@/store/profile';
 
 type DialogNodeWithType = DialogNode & {
   type: DialogMessageType;
@@ -21,6 +23,9 @@ type DialogOptionWithType = DialogOption & {
 const LOADING_MS = 2000; // Вынесли константу
 
 function Dialog() {
+  const invalidateRole = useInvalidateRole();
+  const setProfile = useSetProfile();
+
   const navigate = useNavigate();
   const { scenario, dialogStart } = useLoaderData<DialogLoader>();
 
@@ -84,8 +89,15 @@ function Dialog() {
 
         if (finalStatus != '') {
           await sendDialogResults(scenario.id, finalStatus);
+
+          // Очищаем, чтобы забрать новые данные с бэкенда
+          invalidateRole(scenario.role);
+          setProfile(null);
+
           // Отображать модальное окно результата
-          void navigate('/');
+          setTimeout(() => {
+            void navigate('/');
+          }, 0);
         }
       }
     } catch (error) {
