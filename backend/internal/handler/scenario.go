@@ -13,7 +13,7 @@ import (
 
 type ScenarioService interface {
 	GetAvailableScenarios(ctx context.Context, userID string, role string) ([]*domain.Scenario, error)
-	GetScenarioByID(ctx context.Context, scenarioID int) (*domain.Scenario, error)
+	GetScenarioByID(ctx context.Context, scenarioID int, userID string) (*domain.Scenario, error)
 	ProcessStep(ctx context.Context, currentOptionID int) (*domain.ScenarioNode, error)
 	GetOptionsForNode(ctx context.Context, nodeID int) ([]*domain.ScenarioOption, error)
 	GetOptionByID(ctx context.Context, optionID int) (*domain.ScenarioOption, error)
@@ -66,7 +66,7 @@ func (h *ScenarioHandler) GetScenarios(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ScenarioHandler) GetScenarioByID(w http.ResponseWriter, r *http.Request) {
-	_, err := userctx.GetUserID(r.Context())
+	userID, err := userctx.GetUserID(r.Context())
 	if err != nil {
 		writeError(w, http.StatusUnauthorized, CodeUnauthorized, MessageUnauthorized, err)
 		return
@@ -77,7 +77,7 @@ func (h *ScenarioHandler) GetScenarioByID(w http.ResponseWriter, r *http.Request
 		writeError(w, http.StatusBadRequest, CodeBadRequest, MessageInvalidID, err)
 		return
 	}
-	scenario, err := h.scenarioService.GetScenarioByID(r.Context(), scenarioID)
+	scenario, err := h.scenarioService.GetScenarioByID(r.Context(), scenarioID, userID)
 	if err != nil {
 		if errors.Is(err, domain.ErrScenarioNotFound) {
 			writeError(w, http.StatusNotFound, CodeNotFound, MessageNotFound, err)
@@ -235,7 +235,7 @@ func (h *ScenarioHandler) FinishScenario(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	scenario, err := h.scenarioService.GetScenarioByID(r.Context(), scenarioID)
+	scenario, err := h.scenarioService.GetScenarioByID(r.Context(), scenarioID, userID)
 	if err != nil {
 		if errors.Is(err, domain.ErrScenarioNotFound) {
 			writeError(w, http.StatusNotFound, CodeNotFound, MessageNotFound, err)

@@ -95,15 +95,16 @@ func TestScenarioService_GetScenarioByID(t *testing.T) {
 	svc, repo := setupScenarioService()
 
 	repo.SeedScenario(&domain.Scenario{ID: 1, Title: "Test"})
+	repo.SeedUser(&domain.User{ID: "Test"})
 
 	t.Run("success", func(t *testing.T) {
-		s, err := svc.GetScenarioByID(ctx, 1)
+		s, err := svc.GetScenarioByID(ctx, 1, "Test")
 		require.NoError(t, err)
 		assert.Equal(t, "Test", s.Title)
 	})
 
 	t.Run("not found", func(t *testing.T) {
-		_, err := svc.GetScenarioByID(ctx, 999)
+		_, err := svc.GetScenarioByID(ctx, 999, "Test")
 		assert.ErrorIs(t, err, domain.ErrScenarioNotFound)
 	})
 }

@@ -71,11 +71,32 @@ func (s *ScenarioService) GetAvailableScenarios(
 func (s *ScenarioService) GetScenarioByID(
 	ctx context.Context,
 	scenarioID int,
+	userID string,
 ) (*domain.Scenario, error) {
 	scenario, err := s.scenarioRepo.GetScenarioByID(ctx, scenarioID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get scenario by id: %w", err)
 	}
+	result, err := s.scenarioRepo.GetScenarioResult(ctx, userID, scenarioID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get scenario results: %w", err)
+	}
+
+	if result != nil {
+		bestScore := result.Score
+		scenario.BestScore = &bestScore
+	}
+	user, err := s.userRepo.GetUserByID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user by id: %w", err)
+	}
+	switch scenario.Difficulty {
+	case domain.DifficultyEasy:
+		scenario.IsAvailable = user.CompletedEasyScenarios >= scenario.RequiredScenariosThisLevel
+	case domain.DifficultyHard:
+		scenario.IsAvailable = user.CompletedHardScenarios >= scenario.RequiredScenariosThisLevel
+	}
+
 	return scenario, nil
 }
 
