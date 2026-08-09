@@ -65,3 +65,13 @@ export const FINAL_SCORE: Record<OptionStatus, number> = {
   yellow: 50,
   red: 0,
 };
+
+export type DialogNodeWithType = DialogNode & {
+  type: 'opponent';
+};
+
+export type DialogOptionWithType = DialogOption & {
+  type: 'user';
+};
+
+export type DialogHistory = DialogNodeWithType | DialogOptionWithType;

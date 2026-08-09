@@ -1,4 +1,4 @@
-import { createBrowserRouter, redirect } from 'react-router';
+import { createBrowserRouter, redirect, useLocation } from 'react-router';
 import Main from './layouts/Main';
 import NotFoundPage from './pages/NotFound';
 import ProtectedRoutes from './components/ProtectedRoutes';
@@ -46,8 +46,12 @@ export const router = createBrowserRouter([
           },
           {
             path: '/scenarios/:scenarioId',
-            element: <Dialog />,
+            Component: () => {
+              const location = useLocation();
+              return <Dialog key={location.key} />;
+            },
             loader: dialogLoader,
+            shouldRevalidate: () => true,
             errorElement: <NotFoundPage />,
           },
         ],

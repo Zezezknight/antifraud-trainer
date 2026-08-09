@@ -25,7 +25,7 @@ function NavigationBar({ points, status }: NavigationBarProps) {
         >
           <div className="flex flex-col items-end">
             <span className="text-base font-bold">{points}</span>
-            <span className="text-xs font-medium text-muted-foreground">
+            <span className="text-xs font-medium text-muted-foreground text-right">
               {status}
             </span>
           </div>
