@@ -1,9 +1,11 @@
 import type { DialogLoader } from '@/loaders/dialog';
-import { Link, useLoaderData } from 'react-router';
+import { Link, Navigate, useLoaderData } from 'react-router';
 import { ChevronLeft, CircleQuestionMark } from 'lucide-react';
 
 function Dialog() {
   const { scenario } = useLoaderData<DialogLoader>();
+
+  if (!scenario.isAvailable) return <Navigate to="/" replace />;
 
   return (
     <>
