@@ -1,5 +1,6 @@
 import { AUTH_STORAGE_KEY } from '@/store/user';
 import { jwtDecode } from 'jwt-decode';
+import { redirect } from 'react-router';
 
 export function isTokenExpired(token: string | null) {
   if (!token) return true;
@@ -26,4 +27,12 @@ export function getTokenFromLocalStorage(): string | null {
   } catch {
     return null;
   }
+}
+
+export function checkTokenValidity(): Response | null {
+  const token = getTokenFromLocalStorage();
+  if (!token || isTokenExpired(token)) {
+    return redirect('/login');
+  }
+  return null;
 }
