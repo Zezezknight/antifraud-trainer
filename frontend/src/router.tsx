@@ -11,6 +11,8 @@ import { homeLoader } from './loaders/home';
 import Profile from './pages/Profile';
 import { profileLoader } from './loaders/profile';
 import { getTokenFromLocalStorage, isTokenExpired } from '@/utils/auth';
+import Dialog from './pages/Dialog';
+import { dialogLoader } from './loaders/dialog';
 
 export const router = createBrowserRouter([
   {
@@ -41,6 +43,12 @@ export const router = createBrowserRouter([
             path: '/profile',
             element: <Profile />,
             loader: profileLoader,
+          },
+          {
+            path: '/scenarios/:scenarioId',
+            element: <Dialog />,
+            loader: dialogLoader,
+            errorElement: <NotFoundPage />,
           },
         ],
       },
