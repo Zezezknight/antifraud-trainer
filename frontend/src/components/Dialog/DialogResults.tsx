@@ -114,9 +114,9 @@ function DialogResults({ history, scenario }: DialogResultsProps) {
             [&::-webkit-scrollbar-button]:hidden"
         >
           <div
-            className={`flex flex-col items-center gap-4 ${bgColorTransparent} px-8 py-6`}
+            className={`flex flex-col items-center gap-4 ${bgColorTransparent} px-6 sm:px-8 py-6`}
           >
-            <div className="flex gap-4">
+            <div className="flex flex-col items-center sm:flex-row gap-4">
               <IconInCircle
                 backgroundColor={bgColor}
                 icon={<ShieldCheck className="text-background size-8" />}
@@ -140,7 +140,7 @@ function DialogResults({ history, scenario }: DialogResultsProps) {
             </p>
           </div>
 
-          <div className="px-8">
+          <div className="px-6 sm:px-8">
             <div className="flex flex-col gap-4 pb-6 border-b-2 border-b-border">
               <h3 className="text-base font-semibold">Разбор диалога</h3>
               <Carousel setApi={setApi}>
@@ -168,7 +168,7 @@ function DialogResults({ history, scenario }: DialogResultsProps) {
                     }
 
                     return (
-                      <CarouselItem className="px-12" key={d.node.id}>
+                      <CarouselItem className="px-8 sm:px-12" key={d.node.id}>
                         <div className="bg-background rounded-lg shadow-sm border border-border flex flex-col gap-4 p-4">
                           <h4 className="uppercase text-base font-semibold text-muted-foreground">
                             Шаг {currentSlide + 1}
@@ -192,13 +192,13 @@ function DialogResults({ history, scenario }: DialogResultsProps) {
                     );
                   })}
                 </CarouselContent>
-                <CarouselPrevious className="cursor-pointer" />
-                <CarouselNext className="cursor-pointer" />
+                <CarouselPrevious className="-left-4 sm:-left-2 cursor-pointer" />
+                <CarouselNext className="-right-4 sm:-right-2 cursor-pointer" />
               </Carousel>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 px-8">
+          <div className="flex flex-col gap-3 px-6 sm:px-8">
             <h3 className="text-base font-semibold flex items-center gap-2">
               <Eye className="text-primary" />
               <span>Что на самом деле происходило</span>
@@ -208,7 +208,7 @@ function DialogResults({ history, scenario }: DialogResultsProps) {
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 px-8">
+          <div className="flex flex-col gap-3 px-6 sm:px-8">
             <h3 className="text-base font-semibold flex items-center gap-2">
               <Lightbulb className="text-primary" />
               <span>Как распознать в жизни</span>
@@ -218,7 +218,7 @@ function DialogResults({ history, scenario }: DialogResultsProps) {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 px-8">
+          <div className="flex items-center gap-3 px-6 sm:px-8">
             <Button
               className="flex-1 cursor-pointer"
               variant="outline"
