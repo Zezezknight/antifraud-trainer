@@ -43,6 +43,10 @@ func (h *ScenarioHandler) GetScenarios(w http.ResponseWriter, r *http.Request) {
 	role := r.URL.Query().Get("role")
 	scenarios, err := h.scenarioService.GetAvailableScenarios(r.Context(), userID, role)
 	if err != nil {
+		if errors.Is(err, domain.ErrUserNotFound) {
+			writeError(w, http.StatusNotFound, CodeNotFound, MessageNotFound, err)
+			return
+		}
 		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}

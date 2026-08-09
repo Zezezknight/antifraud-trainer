@@ -44,7 +44,11 @@ func (s *ScenarioService) GetAvailableScenarios(
 		return nil, fmt.Errorf("failed to get scenarios: %w", err)
 	}
 
-	completedByDifficulty := make(map[domain.Difficulty]int)
+	user, err := s.userRepo.GetUserByID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user by id: %w", err)
+	}
+
 	for _, sc := range scenarios {
 		result, err := s.scenarioRepo.GetScenarioResult(ctx, userID, sc.ID)
 		if err != nil {
@@ -54,15 +58,16 @@ func (s *ScenarioService) GetAvailableScenarios(
 		if result != nil {
 			bestScore := result.Score
 			sc.BestScore = &bestScore
-
-			if result.Status == domain.StatusGreen {
-				completedByDifficulty[sc.Difficulty]++
-			}
 		}
 	}
 
 	for _, sc := range scenarios {
-		sc.IsAvailable = completedByDifficulty[sc.Difficulty] >= sc.RequiredScenariosThisLevel
+		switch sc.Difficulty {
+		case domain.DifficultyEasy:
+			sc.IsAvailable = user.CompletedEasyScenarios >= sc.RequiredScenariosThisLevel
+		case domain.DifficultyHard:
+			sc.IsAvailable = user.CompletedHardScenarios >= sc.RequiredScenariosThisLevel
+		}
 	}
 
 	return scenarios, nil
