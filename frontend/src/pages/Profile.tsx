@@ -72,14 +72,29 @@ function Profile() {
   };
 
   const [api, setApi] = useState<CarouselApi>();
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(
+    USER_STATUS_CODES[userStatus],
+  );
 
   useEffect(() => {
     if (!api) return;
 
-    api.on('select', () => {
+    // Перемещаемся к слайду текущего статуса
+    api.scrollTo(USER_STATUS_CODES[userStatus]);
+  }, [api, userStatus]);
+
+  useEffect(() => {
+    if (!api) return;
+
+    const onSelect = () => {
       setCurrentSlide(api.selectedScrollSnap());
-    });
+    };
+
+    api.on('select', onSelect);
+
+    return () => {
+      api.off('select', onSelect);
+    };
   }, [api]);
 
   const isStatusReached = (userStatus: UserStatus, status: UserStatus) =>
