@@ -1,6 +1,6 @@
 import NavigationBar from '@/components/NavigationBar';
 import type { ProfileLoader } from '@/loaders/profile';
-import { useLoaderData } from 'react-router';
+import { useLoaderData, useNavigate } from 'react-router';
 import { CircleStar, TargetIcon, CircleCheck } from 'lucide-react';
 
 import {
@@ -33,7 +33,8 @@ import {
 } from '@/types/profile';
 import closedStatus from '/closed.png';
 import { Fragment, useEffect, useState } from 'react';
-import { useUser } from '@/store/user';
+import { AUTH_STORAGE_KEY, clearUser, useUser } from '@/store/user';
+import { Button } from '@/components/ui/button';
 
 interface StatsCardProps {
   icon: React.JSX.Element;
@@ -53,6 +54,7 @@ function StatsCard({ icon, title, content }: StatsCardProps) {
 }
 
 function Profile() {
+  const navigate = useNavigate();
   const user = useUser();
 
   const {
@@ -188,7 +190,7 @@ function Profile() {
               <span className="text-sm sm:text-base font-medium text-muted-foreground">
                 До ранга "{nextStatus}"
               </span>
-              <span className="text-base font-bold">
+              <span className="text-base font-bold text-right">
                 {pointsForNextStatus} очков
               </span>
             </div>
@@ -204,7 +206,7 @@ function Profile() {
         </div>
       </div>
 
-      <div className="container-box pb-12">
+      <div className="container-box">
         <div className="bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
           <h3 className="text-xl font-semibold">Таблица рейтинга</h3>
 
@@ -261,6 +263,20 @@ function Profile() {
             </TableBody>
           </Table>
         </div>
+      </div>
+
+      <div className="container-box pb-12 flex items-center justify-center">
+        <Button
+          className="text-md px-8 py-6 cursor-pointer"
+          variant="outline"
+          onClick={() => {
+            clearUser();
+            localStorage.removeItem(AUTH_STORAGE_KEY);
+            void navigate('/login');
+          }}
+        >
+          Выйти из аккаунта
+        </Button>
       </div>
     </>
   );
