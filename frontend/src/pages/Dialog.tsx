@@ -8,6 +8,7 @@ import { getDialogStep, sendDialogResults } from '@/service/dialog';
 import { useInvalidateRole } from '@/store/scenarios';
 import { useSetProfile } from '@/store/profile';
 import DialogResults from '@/components/Dialog/DialogResults';
+import { shuffleArray } from '@/utils/sorting';
 
 const LOADING_MS = 2000;
 
@@ -162,20 +163,30 @@ function Dialog() {
           })}
         </div>
 
-        <div className="bg-background pt-4 pb-8">
-          <div className="container-box flex flex-col gap-4 items-center">
+        <div className="bg-background pt-2 sm:pt-4 pb-4 sm:pb-8">
+          <div className="container-box flex flex-col gap-2 sm:gap-4 items-center">
             <span className="text-sm font-medium">
               {currentOptions.length ? 'Как вы поступите?' : 'Выбор завершён.'}
             </span>
             {currentOptions.length ? (
-              <div className="flex flex-col gap-2 w-full">
-                {currentOptions.map(option => (
+              <div className="text-xs sm:text-sm font-medium flex flex-col gap-2 w-full">
+                {shuffleArray(currentOptions).map(option => (
                   <div
                     key={option.id}
-                    className={`transition-colors bg-muted border-border ${isOpponentTyping ? 'text-muted-foreground' : 'hover:bg-primary/20 hover:border-primary cursor-pointer'} border rounded-lg px-4 py-3 text-base font-medium`}
+                    className={`transition-colors bg-muted border-border ${isOpponentTyping ? 'flex items-center justify-center text-muted-foreground' : 'hover:bg-primary/20 hover:border-primary cursor-pointer'} border rounded-lg px-4 py-3`}
                     onClick={() => void handleOptionChoise(option)}
                   >
-                    {option.messageText}
+                    {isOpponentTyping ? (
+                      <Ellipsis
+                        className="size-4 opacity-70
+                          [&_circle]:animate-pulse 
+                          [&_circle:nth-child(1)]:[animation-delay:0ms] 
+                          [&_circle:nth-child(2)]:[animation-delay:200ms] 
+                          [&_circle:nth-child(3)]:[animation-delay:400ms]"
+                      />
+                    ) : (
+                      option.messageText
+                    )}
                   </div>
                 ))}
               </div>
