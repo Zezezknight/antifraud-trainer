@@ -9,7 +9,7 @@ const ListItem = ({ children }: { children: string }) => (
     <IconInCircle
       icon={<ShieldCheck className="text-primary" />}
       variants="sm"
-      backgroundColor="bg-background"
+      backgroundColor="bg-white"
     />
     {children}
   </li>
@@ -22,7 +22,7 @@ function Auth() {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen w-full ">
-      <div className="flex flex-col gap-6 items-start justify-center flex-1/2 bg-primary relative p-8 pt-24 sm:p-12 sm:pt-24 text-background">
+      <div className="flex flex-col gap-6 items-start justify-center flex-1/2 bg-primary relative p-8 pt-24 sm:p-12 sm:pt-24 text-white">
         <img
           src={logo}
           alt="Avito-Antifraud Logo"
