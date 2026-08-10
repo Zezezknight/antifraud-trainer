@@ -15,7 +15,7 @@ function DialogMessage({ type, text, typing = false }: DialogMessageProps) {
       className={`flex flex-col gap-2 ${isOpponent ? 'items-start' : 'items-end'}`}
     >
       <span
-        className={`max-w-3/4 sm:max-w-2/3 md:max-w-1/2 inline-block rounded-lg border px-4 py-3 ${isOpponent ? 'bg-background  border-border' : 'bg-primary/20 border-primary'}`}
+        className={`text-sm sm:text-base max-w-3/4 sm:max-w-2/3 md:max-w-1/2 inline-block rounded-lg border px-4 py-3 ${isOpponent ? 'bg-background  border-border' : 'bg-primary/20 border-primary'}`}
       >
         {typing ? (
           <Ellipsis
