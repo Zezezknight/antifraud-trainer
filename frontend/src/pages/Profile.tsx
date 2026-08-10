@@ -119,7 +119,7 @@ function Profile() {
       <div className="container-box">
         <div className="bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
           <div className="flex items-center gap-6">
-            <span className="text-3xl font-bold text-background bg-primary size-20 flex items-center justify-center rounded-full">
+            <span className="text-3xl font-bold text-white bg-primary size-20 flex items-center justify-center rounded-full">
               {userProfile.user.name[0]}
             </span>
             <h2 className="text-2xl font-bold">{userProfile.user.name}</h2>
