@@ -119,7 +119,7 @@ function DialogResults({ history, scenario }: DialogResultsProps) {
             <div className="flex flex-col items-center sm:flex-row gap-4">
               <IconInCircle
                 backgroundColor={bgColor}
-                icon={<ShieldCheck className="text-background size-8" />}
+                icon={<ShieldCheck className="text-white size-8" />}
                 variants="lg"
               />
               <div className="flex flex-col gap-1 items-center">
