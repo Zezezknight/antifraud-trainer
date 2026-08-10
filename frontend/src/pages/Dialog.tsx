@@ -1,6 +1,6 @@
 import type { DialogLoader } from '@/loaders/dialog';
 import { Link, useLoaderData } from 'react-router';
-import { ChevronLeft, CircleQuestionMark } from 'lucide-react';
+import { ChevronLeft, CircleQuestionMark, Ellipsis, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { type DialogHistory, type DialogOption } from '@/types/dialog';
 import DialogMessage from '@/components/Dialog/DialogMessage';
@@ -9,7 +9,7 @@ import { useInvalidateRole } from '@/store/scenarios';
 import { useSetProfile } from '@/store/profile';
 import DialogResults from '@/components/Dialog/DialogResults';
 
-const LOADING_MS = 2000; // Вынесли константу
+const LOADING_MS = 2000;
 
 function Dialog() {
   const invalidateRole = useInvalidateRole();
@@ -27,10 +27,9 @@ function Dialog() {
     },
   ]);
 
-  console.log(dialogHistory);
-
   const [isOpponentTyping, setIsOpponentTyping] = useState(true);
   const [modalResultsShown, setModalResultsShown] = useState(false);
+  const [showDialogDescription, setShowDialogDescription] = useState(true);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -96,7 +95,7 @@ function Dialog() {
       {modalResultsShown && (
         <DialogResults scenario={scenario} history={dialogHistory} />
       )}
-      <div className="h-screen flex flex-col gap-6">
+      <div className="h-screen flex flex-col gap-4">
         <div className="shadow-sm">
           <div className="bg-background py-4">
             <div className="container-box flex items-center gap-4">
@@ -118,18 +117,25 @@ function Dialog() {
               </div>
             </div>
           </div>
-          <div className="bg-primary-foreground py-1">
-            <div className="container-box flex items-center justify-center gap-2">
-              <CircleQuestionMark className="shrink-0 size-4 text-primary" />
-              <span className="text-xs font-medium text-[#090b0c]">
-                {scenario.description}
-              </span>
+          {showDialogDescription ? (
+            <div className="bg-primary-foreground py-1">
+              <div className="container-box flex items-center justify-center gap-2 relative text-[#090b0c]">
+                <CircleQuestionMark className="shrink-0 size-4 text-primary" />
+                <span className="text-xs font-medium pr-3 sm:pr-0">
+                  {scenario.description}
+                </span>
+
+                <X
+                  className="p-1 size-6 absolute -top-1 right-0 cursor-pointer"
+                  onClick={() => setShowDialogDescription(false)}
+                />
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
 
         <div
-          className="container-box flex-1 overflow-y-auto flex flex-col gap-8 py-6
+          className="container-box flex-1 overflow-y-auto flex flex-col gap-8 py-2 sm:py-6
             scrollbar-thin 
             [scrollbar-color:rgba(0,0,0,0.15)_transparent] 
             [&::-webkit-scrollbar]:w-1.5 
