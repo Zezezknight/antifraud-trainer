@@ -121,7 +121,7 @@ function Dialog() {
           <div className="bg-primary-foreground py-1">
             <div className="container-box flex items-center justify-center gap-2">
               <CircleQuestionMark className="shrink-0 size-4 text-primary" />
-              <span className="text-xs font-medium">
+              <span className="text-xs font-medium text-[#090b0c]">
                 {scenario.description}
               </span>
             </div>
