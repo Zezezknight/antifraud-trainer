@@ -176,16 +176,16 @@ function Profile() {
 
           <div className="flex items-center justify-center gap-3">
             {isCurrentStatusReached && (
-              <CircleCheck className="size-8 text-primary" />
+              <CircleCheck className="size-6 sm:size-8 text-primary" />
             )}
             <h2
-              className={`text-center text-2xl sm:text-3xl font-bold ${isCurrentStatusReached || 'text-muted-foreground'}`}
+              className={`text-center text-xl sm:text-3xl font-bold ${isCurrentStatusReached || 'text-muted-foreground'}`}
             >
               {USER_STATUSES[currentSlide]}
             </h2>
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2 sm:gap-4">
             <div className="flex items-center justify-between">
               <span className="text-sm sm:text-base font-medium text-muted-foreground">
                 До ранга "{nextStatus}"
