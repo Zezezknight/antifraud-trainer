@@ -105,7 +105,7 @@ function DialogResults({ history, scenario }: DialogResultsProps) {
     <div className="absolute inset-0 z-10 bg-foreground/20 backdrop-blur-md flex items-center justify-center">
       <div className="container-box flex items-center justify-center">
         <div
-          className="bg-background rounded-lg shadow-sm w-full max-w-175 max-h-[90vh] overflow-hidden overflow-y-auto pb-6 flex flex-col gap-6 scrollbar-thin 
+          className="bg-background rounded-lg shadow-sm w-full max-w-175 max-h-[80vh] sm:max-h-[90vh] overflow-hidden overflow-y-auto pb-6 flex flex-col gap-6 scrollbar-thin 
             [scrollbar-color:rgba(0,0,0,0.15)_transparent] 
             [&::-webkit-scrollbar]:w-1.5 
             [&::-webkit-scrollbar-track]:bg-muted-foreground 
@@ -123,7 +123,7 @@ function DialogResults({ history, scenario }: DialogResultsProps) {
                 variants="lg"
               />
               <div className="flex flex-col gap-1 items-center">
-                <h2 className={`text-2xl font-bold ${textColor}`}>
+                <h2 className={`text-center  text-2xl font-bold ${textColor}`}>
                   {titleText}
                 </h2>
                 <span className="text-sm">{subtitleText}</span>
@@ -175,14 +175,14 @@ function DialogResults({ history, scenario }: DialogResultsProps) {
                           </h4>
 
                           <div className="flex justify-start">
-                            <div className="max-w-3/4 bg-muted rounded-lg border border-border px-4 py-3 text-sm font-medium">
+                            <div className="max-w-3/4 bg-muted rounded-lg border border-border px-4 py-3 text-xs sm:text-sm font-medium">
                               {d.node.messageText}
                             </div>
                           </div>
 
                           <div className="flex justify-end">
                             <div
-                              className={`max-w-3/4 rounded-lg border px-4 py-3 text-sm font-medium ${optBgColor} ${optBorderColor}`}
+                              className={`max-w-3/4 rounded-lg border px-4 py-3 text-xs sm:text-sm font-medium ${optBgColor} ${optBorderColor}`}
                             >
                               {d.opt.messageText}
                             </div>
@@ -203,7 +203,7 @@ function DialogResults({ history, scenario }: DialogResultsProps) {
               <Eye className="text-primary" />
               <span>Что на самом деле происходило</span>
             </h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {dialogNodes[currentSlide].opt.feedbackText}
             </p>
           </div>
@@ -213,7 +213,7 @@ function DialogResults({ history, scenario }: DialogResultsProps) {
               <Lightbulb className="text-primary" />
               <span>Как распознать в жизни</span>
             </h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {dialogNodes[currentSlide].opt.howToRecognizeInLife}
             </p>
           </div>

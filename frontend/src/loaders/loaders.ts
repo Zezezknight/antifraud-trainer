@@ -13,6 +13,8 @@ import { checkTokenValidity } from '@/utils/auth';
 import { getDialogStart } from '@/service/dialog';
 import axios from 'axios';
 import type { Dialog } from '@/types/dialog';
+import { AUTH_STORAGE_KEY, clearUser } from '@/store/user';
+import { redirect } from 'react-router';
 
 export function userProfileLoader(): Promise<UserProfile> {
   const tokenCheck = checkTokenValidity();
@@ -23,7 +25,18 @@ export function userProfileLoader(): Promise<UserProfile> {
     setSnapshot: profile => useUserProfileStore.getState().setProfile(profile),
     fetcher: getUserProfile,
     onError: error => console.error('Ошибка загрузки профиля:', error),
-  })();
+    needToThrowError: true,
+  })().catch(error => {
+    console.log(error);
+
+    // Пользователь не найден при очистки БД
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      clearUser();
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      throw redirect('/login');
+    }
+    throw error;
+  });
 }
 
 export function scenariosLoader<R extends Role>(
@@ -44,6 +57,8 @@ export function scenariosLoader<R extends Role>(
     fetcher: () => getScenarios<R>(role),
     onError: error =>
       console.error(`Ошибка загрузки сценариев (${role}):`, error),
+    needToThrowError: false,
+    fallback: [],
   })();
 }
 
@@ -68,6 +83,7 @@ export function scenarioLoader(scenarioId: number): Promise<Scenario> {
     onError: error => {
       console.error(`Ошибка загрузки сценария с ID=${scenarioId}:`, error);
     },
+    needToThrowError: true,
   })()
     .then(scenario => {
       if (!scenario.isAvailable) {
@@ -82,7 +98,11 @@ export function scenarioLoader(scenarioId: number): Promise<Scenario> {
         throw error;
       }
 
-      throw new Response('Not Found', { status: 404 });
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        throw new Response('Not Found', { status: 404 });
+      }
+
+      throw new Response('Internal Server Error', { status: 500 });
     });
 }
 
@@ -121,5 +141,7 @@ export function leaderboardLoader(): Promise<Leaderboard[]> {
     },
     fetcher: () => getLeaderboard(),
     onError: error => console.error('Ошибка загрузки таблицы лидеров: ', error),
+    needToThrowError: false,
+    fallback: [],
   })();
 }

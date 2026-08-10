@@ -1,18 +1,27 @@
 type Loader<T> = () => Promise<T>;
 
-interface CachedLoaderOptions<T> {
-  getSnapshot: () => T | null;
-  setSnapshot: (value: T) => void;
-  fetcher: Loader<T>;
-  onError?: (error: unknown) => void;
-}
+type CachedLoaderOptions<T> =
+  | {
+      getSnapshot: () => T | null;
+      setSnapshot: (value: T) => void;
+      fetcher: () => Promise<T>;
+      onError?: (error: unknown) => void;
+      needToThrowError: true;
+    }
+  | {
+      getSnapshot: () => T | null;
+      setSnapshot: (value: T) => void;
+      fetcher: () => Promise<T>;
+      onError?: (error: unknown) => void;
+      needToThrowError?: false;
+      fallback: T; // обязателен, если не кидаем ошибку
+    };
 
-export function createCachedLoader<T>({
-  getSnapshot,
-  setSnapshot,
-  fetcher,
-  onError,
-}: CachedLoaderOptions<T>): Loader<T> {
+export function createCachedLoader<T>(
+  options: CachedLoaderOptions<T>,
+): Loader<T> {
+  const { getSnapshot, setSnapshot, fetcher, onError } = options;
+
   return async () => {
     const cachedValue = getSnapshot();
 
@@ -26,7 +35,8 @@ export function createCachedLoader<T>({
       return value;
     } catch (error) {
       onError?.(error);
-      throw error;
+      if (options.needToThrowError) throw error;
+      return options.fallback;
     }
   };
 }
