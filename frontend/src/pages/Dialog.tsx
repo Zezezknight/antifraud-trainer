@@ -1,7 +1,7 @@
 import type { DialogLoader } from '@/loaders/dialog';
 import { Link, useLoaderData } from 'react-router';
 import { ChevronLeft, CircleQuestionMark, Ellipsis, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { type DialogHistory, type DialogOption } from '@/types/dialog';
 import DialogMessage from '@/components/Dialog/DialogMessage';
 import { getDialogStep, sendDialogResults } from '@/service/dialog';
@@ -31,6 +31,17 @@ function Dialog() {
   const [isOpponentTyping, setIsOpponentTyping] = useState(true);
   const [modalResultsShown, setModalResultsShown] = useState(false);
   const [showDialogDescription, setShowDialogDescription] = useState(true);
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth', // Плавный скролл
+      });
+    }
+  }, [dialogHistory, isOpponentTyping]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -136,6 +147,7 @@ function Dialog() {
         </div>
 
         <div
+          ref={scrollContainerRef}
           className="container-box flex-1 overflow-y-auto flex flex-col gap-8 py-2 sm:py-6
             scrollbar-thin 
             [scrollbar-color:rgba(0,0,0,0.15)_transparent] 
