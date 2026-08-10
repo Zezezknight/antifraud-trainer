@@ -110,7 +110,7 @@ function Dialog() {
 
               <div className="flex flex-col">
                 <span className="text-sm sm:text-base font-semibold">
-                  {scenario.role === 'buyer' ? 'Покупатель' : 'Продавец'}
+                  {scenario.role === 'buyer' ? 'Продавец' : 'Покупатель'}
                 </span>
                 <span className="text-xs sm:text-sm font-medium text-muted-foreground">
                   {scenario.title}
