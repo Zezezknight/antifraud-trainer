@@ -7,7 +7,6 @@ import type { Scenario, Role } from '@/types/scenarios';
 
 import { createCachedLoader } from './utils';
 import type { Leaderboard } from '@/types/leaderboard';
-import { useLeaderboardStore } from '@/store/leaderboard';
 import { getLeaderboard } from '@/service/leaderboard';
 import { checkTokenValidity } from '@/utils/auth';
 import { getDialogStart } from '@/service/dialog';
@@ -127,21 +126,15 @@ export async function dialogStartLoader(scenarioId: number): Promise<Dialog> {
   }
 }
 
-export function leaderboardLoader(): Promise<Leaderboard[]> {
+export async function leaderboardLoader(): Promise<Leaderboard[]> {
   const tokenCheck = checkTokenValidity();
   if (tokenCheck) throw tokenCheck;
 
-  return createCachedLoader({
-    getSnapshot: () => {
-      const { leaderboard } = useLeaderboardStore.getState();
-      return leaderboard.length > 0 ? leaderboard : null;
-    },
-    setSnapshot: value => {
-      useLeaderboardStore.getState().setLeaderboard(value);
-    },
-    fetcher: () => getLeaderboard(),
-    onError: error => console.error('Ошибка загрузки таблицы лидеров: ', error),
-    needToThrowError: false,
-    fallback: [],
-  })();
+  try {
+    return await getLeaderboard();
+  } catch (error) {
+    console.error('Ошибка загрузки таблицы лидеров: ', error);
+
+    throw new Response('Internal Server Error', { status: 500 });
+  }
 }
