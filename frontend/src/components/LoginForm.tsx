@@ -73,7 +73,7 @@ export function LoginForm() {
   const errorMessages = Array.isArray(error) ? error : error ? [error] : [];
 
   return (
-    <div className="flex flex-col gap-6 w-2/3">
+    <div className="container-box px-8 flex flex-col gap-6 w-full sm:w-5/6 lg:w-2/3 pb-12">
       <Card className="py-6 px-2">
         <CardHeader>
           <CardTitle>Войти в аккаунт</CardTitle>
