@@ -16,6 +16,6 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /avito-antifraud-trainer
+            cd ~/avito-antifraud-trainer
             git pull origin main
             docker compose up -d --build
