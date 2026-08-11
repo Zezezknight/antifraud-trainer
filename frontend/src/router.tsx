@@ -13,6 +13,7 @@ import { profileLoader } from './loaders/profile';
 import { getTokenFromLocalStorage, isTokenExpired } from '@/utils/auth';
 import Dialog from './pages/Dialog';
 import { dialogLoader } from './loaders/dialog';
+import { AUTH_STORAGE_KEY, clearUser } from './store/user';
 
 export const router = createBrowserRouter([
   {
@@ -28,6 +29,8 @@ export const router = createBrowserRouter([
 
           // Если токена нет или он просрочен, прерываем цепочку и редиректим
           if (!token || isExpired) {
+            clearUser();
+            localStorage.removeItem(AUTH_STORAGE_KEY);
             return redirect('/login');
           }
 
