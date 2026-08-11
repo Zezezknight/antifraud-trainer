@@ -17,13 +17,13 @@ type Config struct {
 
 func (c *Config) Validate() error {
 	if c.Port < 1 || c.Port > 65535 {
-		return fmt.Errorf("некорректный порт: %d", c.Port)
+		return fmt.Errorf("incorrect port: %d", c.Port)
 	}
 	if c.DSN == "" {
-		return fmt.Errorf("строка для подключения к бд не может быть пустой")
+		return fmt.Errorf("dsn can not be empty")
 	}
 	if c.JWTSecret == "" {
-		return fmt.Errorf("секрет для JWT не может быть пустым")
+		return fmt.Errorf("jwt secret can not be empty")
 	}
 	return nil
 }
@@ -36,7 +36,7 @@ func Load() (*Config, error) {
 
 	portNum, err := strconv.Atoi(portStr)
 	if err != nil {
-		return nil, fmt.Errorf("порт должен быть числом: %s", portStr)
+		return nil, fmt.Errorf("port must be a number: %s", portStr)
 	}
 
 	conf := Config{
@@ -47,7 +47,7 @@ func Load() (*Config, error) {
 	}
 
 	if err = conf.Validate(); err != nil {
-		return nil, fmt.Errorf("ошибка валидации конфига: %w", err)
+		return nil, fmt.Errorf("config validation error: %w", err)
 	}
 
 	return &conf, nil
