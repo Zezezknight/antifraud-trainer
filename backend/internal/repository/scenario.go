@@ -255,7 +255,7 @@ func (r *ScenarioRepository) GetLeaderBoard(ctx context.Context, userID string) 
 	const query = `
 		WITH ranked AS (
 			SELECT id, username, points, status,
-			       DENSE_RANK() OVER (ORDER BY points DESC) AS rank
+			       ROW_NUMBER() OVER (ORDER BY points DESC) AS rank
 			FROM users
 		)
 		SELECT rank, id, username, points, status
