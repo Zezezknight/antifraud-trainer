@@ -54,8 +54,8 @@
 Клонируйте репозиторий и запустите проект через Docker:
 
 ```bash
-git clone git@github.com:Zezezknight/avito-antifraud-trainer.git
-cd ./avito-antifraud-trainer
+git clone git@github.com:Zezezknight/antifraud-trainer.git
+cd ./antifraud-trainer
 
 # Настройка переменных окружения
 mv backend/.env.example backend/.env
