@@ -1,19 +1,15 @@
-import type { UserProfile } from '@/types/profile';
-import type { Scenario } from '@/types/scenarios';
-import { composeLoaders } from './utils';
-import { userProfileLoader } from './loaders';
-import { scenariosLoader } from './loaders';
+import type { QueryClient } from '@tanstack/react-query';
+import { scenariosQuery } from '@/queries/scenarios';
+import { profileQuery } from '@/queries/profile';
 
-export interface HomeLoader {
-  profile: UserProfile;
-  seller: Scenario<'seller'>[];
-  buyer: Scenario<'buyer'>[];
-}
+export function homeLoader(queryClient: QueryClient) {
+  return async () => {
+    const [buyer, seller] = await Promise.all([
+      queryClient.ensureQueryData(scenariosQuery<'buyer'>('buyer')),
+      queryClient.ensureQueryData(scenariosQuery<'seller'>('seller')),
+    ]);
+    const profile = queryClient.ensureQueryData(profileQuery());
 
-export async function homeLoader(): Promise<HomeLoader> {
-  return composeLoaders({
-    profile: userProfileLoader,
-    buyer: () => scenariosLoader('buyer'),
-    seller: () => scenariosLoader('seller'),
-  });
+    return { buyer, seller, profile };
+  };
 }
