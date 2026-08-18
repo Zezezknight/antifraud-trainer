@@ -13,7 +13,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { registerUser } from '@/service/auth';
+import { registerUser } from '@/api/auth';
 import { useSetUser } from '@/store/user';
 import { isApiError } from '@/types/api';
 import axios from 'axios';

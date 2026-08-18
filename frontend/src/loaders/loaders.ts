@@ -1,15 +1,15 @@
-import { getUserProfile } from '@/service/profile';
+import { getUserProfile } from '@/api/profile';
 import { useUserProfileStore } from '@/store/profile';
 import type { UserProfile } from '@/types/profile';
-import { getScenarioById, getScenarios } from '@/service/scenarios';
+import { getScenarioById, getScenarios } from '@/api/scenarios';
 import { useScenariosStore } from '@/store/scenarios';
 import type { Scenario, Role } from '@/types/scenarios';
 
 import { createCachedLoader } from './utils';
 import type { Leaderboard } from '@/types/leaderboard';
-import { getLeaderboard } from '@/service/leaderboard';
+import { getLeaderboard } from '@/api/leaderboard';
 import { checkTokenValidity } from '@/utils/auth';
-import { getDialogStart } from '@/service/dialog';
+import { getDialogStart } from '@/api/dialog';
 import axios from 'axios';
 import type { Dialog } from '@/types/dialog';
 import { AUTH_STORAGE_KEY, clearUser } from '@/store/user';

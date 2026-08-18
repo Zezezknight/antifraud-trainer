@@ -4,7 +4,7 @@ import { ChevronLeft, CircleQuestionMark, Ellipsis, X } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { type DialogHistory, type DialogOption } from '@/types/dialog';
 import DialogMessage from '@/components/Dialog/DialogMessage';
-import { getDialogStep, sendDialogResults } from '@/service/dialog';
+import { getDialogStep, sendDialogResults } from '@/api/dialog';
 import { useInvalidateRole } from '@/store/scenarios';
 import { useSetProfile } from '@/store/profile';
 import DialogResults from '@/components/Dialog/DialogResults';

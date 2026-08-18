@@ -19,7 +19,7 @@ import axios from 'axios';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import * as z from 'zod';
-import { loginUser } from '@/service/auth';
+import { loginUser } from '@/api/auth';
 
 interface LoginData {
   login: string;
