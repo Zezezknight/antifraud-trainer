@@ -1,5 +1,4 @@
-import type { DialogLoader } from '@/loaders/dialog';
-import { Link, useLoaderData } from 'react-router';
+import { Link, useParams } from 'react-router';
 import { ChevronLeft, CircleQuestionMark, Ellipsis, X } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { type DialogHistory, type DialogOption } from '@/types/dialog';
@@ -9,6 +8,9 @@ import { useInvalidateRole } from '@/store/scenarios';
 import { useSetProfile } from '@/store/profile';
 import DialogResults from '@/components/Dialog/DialogResults';
 import { shuffleArray } from '@/utils/sorting';
+import { useSuspenseQueries } from '@tanstack/react-query';
+import { dialogStartQuery } from '@/queries/dialog';
+import { scenarioQuery } from '@/queries/scenarios';
 
 const LOADING_MS = 2000;
 
@@ -16,7 +18,12 @@ function Dialog() {
   const invalidateRole = useInvalidateRole();
   const setProfile = useSetProfile();
 
-  const { scenario, dialogStart } = useLoaderData<DialogLoader>();
+  const { scenarioId: scenarioIdRow } = useParams();
+  const scenarioId = Number(scenarioIdRow);
+
+  const [{ data: dialogStart }, { data: scenario }] = useSuspenseQueries({
+    queries: [dialogStartQuery(scenarioId), scenarioQuery(scenarioId)],
+  });
 
   const [currentOptions, setCurrentOptions] = useState<DialogOption[]>(
     dialogStart.options,

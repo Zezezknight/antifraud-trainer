@@ -1,6 +1,5 @@
 import NavigationBar from '@/components/NavigationBar';
-import type { ProfileLoader } from '@/loaders/profile';
-import { useLoaderData, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { CircleStar, TargetIcon, CircleCheck } from 'lucide-react';
 
 import {
@@ -35,6 +34,10 @@ import closedStatus from '/closed.png';
 import { Fragment, useEffect, useState } from 'react';
 import { AUTH_STORAGE_KEY, clearUser, useUser } from '@/store/user';
 import { Button } from '@/components/ui/button';
+import { useSuspenseQueries } from '@tanstack/react-query';
+import { profileQuery } from '@/queries/profile';
+import { leaderboardQuery } from '@/queries/leaderboard';
+import { scenariosQuery } from '@/queries/scenarios';
 
 interface StatsCardProps {
   icon: React.JSX.Element;
@@ -57,12 +60,20 @@ function Profile() {
   const navigate = useNavigate();
   const user = useUser();
 
-  const {
-    profile: userProfile,
-    leaderboard,
-    buyer,
-    seller,
-  } = useLoaderData<ProfileLoader>();
+  const [
+    { data: buyerScenarios },
+    { data: sellerScenarios },
+    { data: userProfile },
+    { data: leaderboard },
+  ] = useSuspenseQueries({
+    queries: [
+      scenariosQuery<'buyer'>('buyer'),
+      scenariosQuery<'seller'>('seller'),
+      profileQuery(),
+      leaderboardQuery(),
+    ],
+  });
+
   const userPoints = userProfile.points;
   const userStatus = userProfile.status;
 
@@ -134,7 +145,7 @@ function Profile() {
             <StatsCard
               icon={<TargetIcon />}
               title="Пройдено"
-              content={`${userProfile.completedEasyScenarios + userProfile.completedHardScenarios} / ${buyer.length + seller.length}`}
+              content={`${userProfile.completedEasyScenarios + userProfile.completedHardScenarios} / ${buyerScenarios.length + sellerScenarios.length}`}
             />
           </div>
         </div>

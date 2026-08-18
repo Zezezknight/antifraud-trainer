@@ -1,15 +1,22 @@
 import NavigationBar from '@/components/NavigationBar';
 import Scenarios from '@/components/Scenarios/Scenarios';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { HomeLoader } from '@/loaders/home';
-import { useLoaderData } from 'react-router';
+import { profileQuery } from '@/queries/profile';
+import { scenariosQuery } from '@/queries/scenarios';
+import { useSuspenseQueries } from '@tanstack/react-query';
 
 function Home() {
-  const {
-    profile: userProfile,
-    seller: sellerScenarios,
-    buyer: buyerScenarios,
-  } = useLoaderData<HomeLoader>();
+  const [
+    { data: buyerScenarios },
+    { data: sellerScenarios },
+    { data: userProfile },
+  ] = useSuspenseQueries({
+    queries: [
+      scenariosQuery<'buyer'>('buyer'),
+      scenariosQuery<'seller'>('seller'),
+      profileQuery(),
+    ],
+  });
 
   return (
     <>
