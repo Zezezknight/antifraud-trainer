@@ -1,4 +1,3 @@
-import NavigationBar from '@/components/NavigationBar';
 import { useNavigate } from 'react-router';
 import { CircleStar, TargetIcon, CircleCheck } from 'lucide-react';
 
@@ -125,8 +124,6 @@ function Profile() {
 
   return (
     <>
-      <NavigationBar points={userPoints} status={userStatus} />
-
       <div className="container-box">
         <div className="bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
           <div className="flex items-center gap-6">

@@ -1,26 +1,19 @@
-import NavigationBar from '@/components/NavigationBar';
 import Scenarios from '@/components/Scenarios/Scenarios';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { profileQuery } from '@/queries/profile';
 import { scenariosQuery } from '@/queries/scenarios';
 import { useSuspenseQueries } from '@tanstack/react-query';
 
 function Home() {
-  const [
-    { data: buyerScenarios },
-    { data: sellerScenarios },
-    { data: userProfile },
-  ] = useSuspenseQueries({
-    queries: [
-      scenariosQuery<'buyer'>('buyer'),
-      scenariosQuery<'seller'>('seller'),
-      profileQuery(),
-    ],
-  });
+  const [{ data: buyerScenarios }, { data: sellerScenarios }] =
+    useSuspenseQueries({
+      queries: [
+        scenariosQuery<'buyer'>('buyer'),
+        scenariosQuery<'seller'>('seller'),
+      ],
+    });
 
   return (
     <>
-      <NavigationBar points={userProfile.points} status={userProfile.status} />
       <div className="container-box flex flex-col gap-4 sm:gap-8">
         <h1 className="text-3xl sm:text-4xl font-bold">Выберите сценарий</h1>
         <p className="text-md sm:text-lg md:w-3/4 lg:w-1/2">
