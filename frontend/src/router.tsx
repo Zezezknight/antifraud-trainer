@@ -15,6 +15,7 @@ import Dialog from './pages/Dialog';
 import { dialogLoader } from './loaders/dialog';
 import { AUTH_STORAGE_KEY, clearUser } from './store/user';
 import { queryClient } from './query-client';
+import NavigationBarLayout from './layouts/NavigationBarLayout';
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
       {
         // Защищенный сектор сайта (требуется авторизация пользователя)
         element: <ProtectedRoutes />,
+        hydrateFallbackElement: <HydrateFallbackPage />,
         loader: () => {
           const token = getTokenFromLocalStorage();
           const isExpired = isTokenExpired(token);
@@ -38,24 +40,35 @@ export const router = createBrowserRouter([
         },
         children: [
           {
-            index: true, // Главная страница (/)
-            element: <Home />,
-            loader: homeLoader(queryClient),
+            // Страницы, которые используют внутри себя навигационное меню
+            element: <NavigationBarLayout />,
+            children: [
+              {
+                index: true, // Главная страница (/)
+                element: <Home />,
+                loader: homeLoader(queryClient),
+              },
+              {
+                path: '/profile',
+                element: <Profile />,
+                loader: profileLoader(queryClient),
+              },
+            ],
           },
           {
-            path: '/profile',
-            element: <Profile />,
-            loader: profileLoader(queryClient),
-          },
-          {
-            path: '/scenarios/:scenarioId',
-            Component: () => {
-              const location = useLocation();
-              return <Dialog key={location.key} />;
-            },
-            loader: dialogLoader(queryClient),
-            shouldRevalidate: () => true,
-            errorElement: <NotFoundPage />,
+            // Страницы, которые НЕ используют внутри себя навигационное меню
+            children: [
+              {
+                path: '/scenarios/:scenarioId',
+                Component: () => {
+                  const location = useLocation();
+                  return <Dialog key={location.key} />;
+                },
+                loader: dialogLoader(queryClient),
+                shouldRevalidate: () => true,
+                errorElement: <NotFoundPage />,
+              },
+            ],
           },
         ],
       },
