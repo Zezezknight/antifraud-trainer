@@ -15,7 +15,10 @@ import Dialog from './pages/Dialog';
 import { dialogLoader } from './loaders/dialog';
 import { AUTH_STORAGE_KEY, clearUser } from './store/user';
 import { queryClient } from './query-client';
+import HomePageSkeleton from './components/skeletons/HomePageSkeleton';
 import NavigationBarLayout from './layouts/NavigationBarLayout';
+import ProfilePageSkeleton from './components/skeletons/ProfilePageSkeleton';
+import DialogPageSkeleton from './components/skeletons/DialogPageSkeleton';
 
 export const router = createBrowserRouter([
   {
@@ -46,11 +49,13 @@ export const router = createBrowserRouter([
               {
                 index: true, // Главная страница (/)
                 element: <Home />,
+                hydrateFallbackElement: <HomePageSkeleton />,
                 loader: homeLoader(queryClient),
               },
               {
                 path: '/profile',
                 element: <Profile />,
+                hydrateFallbackElement: <ProfilePageSkeleton />,
                 loader: profileLoader(queryClient),
               },
             ],
@@ -64,6 +69,7 @@ export const router = createBrowserRouter([
                   const location = useLocation();
                   return <Dialog key={location.key} />;
                 },
+                hydrateFallbackElement: <DialogPageSkeleton />,
                 loader: dialogLoader(queryClient),
                 shouldRevalidate: () => true,
                 errorElement: <NotFoundPage />,
