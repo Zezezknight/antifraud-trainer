@@ -1,11 +1,11 @@
 import { createBrowserRouter, redirect, useLocation } from 'react-router';
-import Main from './layouts/Main';
+import MainLayout from './layouts/MainLayout';
 import NotFoundPage from './pages/NotFound';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import Home from './pages/Home';
 import HydrateFallbackPage from './pages/HydrateFallback';
 import { LoginForm } from './components/LoginForm';
-import Auth from './layouts/Auth';
+import AuthLayout from './layouts/AuthLayout';
 import { RegisterForm } from './components/RegisterForm';
 import { homeLoader } from './loaders/home';
 import Profile from './pages/Profile';
@@ -18,8 +18,7 @@ import { queryClient } from './query-client';
 
 export const router = createBrowserRouter([
   {
-    element: <Main />, // Главный Layout
-    hydrateFallbackElement: <HydrateFallbackPage />,
+    element: <MainLayout />, // Главный Layout
     children: [
       {
         // Защищенный сектор сайта (требуется авторизация пользователя)
@@ -61,7 +60,7 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        element: <Auth />, // Layout Авторизации
+        element: <AuthLayout />, // Layout Авторизации
         children: [
           {
             path: '/login', // Страница входа в аккаунт
