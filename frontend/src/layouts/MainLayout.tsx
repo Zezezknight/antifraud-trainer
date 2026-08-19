@@ -1,10 +1,14 @@
 import { Outlet } from 'react-router';
 import '@/style.css';
+import TopProgressBar from '@/components/TopProgressBar';
 
 function MainLayout() {
   return (
-    <div className="flex min-h-screen w-full flex-col gap-12 bg-muted">
-      <Outlet />
+    <div className="min-h-screen w-full bg-muted">
+      <TopProgressBar />
+      <div className="flex flex-col gap-12">
+        <Outlet />
+      </div>
     </div>
   );
 }
