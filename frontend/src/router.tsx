@@ -14,6 +14,7 @@ import { getTokenFromLocalStorage, isTokenExpired } from '@/utils/auth';
 import Dialog from './pages/Dialog';
 import { dialogLoader } from './loaders/dialog';
 import { AUTH_STORAGE_KEY, clearUser } from './store/user';
+import { queryClient } from './query-client';
 
 export const router = createBrowserRouter([
   {
@@ -40,12 +41,12 @@ export const router = createBrowserRouter([
           {
             index: true, // Главная страница (/)
             element: <Home />,
-            loader: homeLoader,
+            loader: homeLoader(queryClient),
           },
           {
             path: '/profile',
             element: <Profile />,
-            loader: profileLoader,
+            loader: profileLoader(queryClient),
           },
           {
             path: '/scenarios/:scenarioId',
@@ -53,7 +54,7 @@ export const router = createBrowserRouter([
               const location = useLocation();
               return <Dialog key={location.key} />;
             },
-            loader: dialogLoader,
+            loader: dialogLoader(queryClient),
             shouldRevalidate: () => true,
             errorElement: <NotFoundPage />,
           },
