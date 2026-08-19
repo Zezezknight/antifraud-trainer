@@ -8,11 +8,8 @@ export function dialogLoader(queryClient: QueryClient) {
     const { scenarioId: scenarioIdRow } = params;
     const scenarioId = Number(scenarioIdRow);
 
-    const dialogStart = await queryClient.ensureQueryData(
-      dialogStartQuery(scenarioId),
-    );
-    const scenario = queryClient.ensureQueryData(scenarioQuery(scenarioId));
+    queryClient.ensureQueryData(scenarioQuery(scenarioId)).catch(() => {});
 
-    return { dialogStart, scenario };
+    await queryClient.ensureQueryData(dialogStartQuery(scenarioId));
   };
 }

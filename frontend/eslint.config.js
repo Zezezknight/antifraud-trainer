@@ -34,6 +34,7 @@ export default defineConfig([
       ],
       'only-throw-error': 'off',
       '@typescript-eslint/only-throw-error': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
     },
   },
 ]);
