@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 )
 
 type TokenGenerator interface {
@@ -63,8 +64,18 @@ func (h *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cookie := http.Cookie{
+		Name:     "access_token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   3600 * 24,
+	}
+	http.SetCookie(w, &cookie)
+
 	resp := dto.AuthResponse{
-		Token: token,
 		User: dto.User{
 			ID:                     user.ID,
 			Username:               user.Username,
@@ -74,6 +85,7 @@ func (h *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 			CompletedHardScenarios: user.CompletedHardScenarios,
 		},
 	}
+
 	writeResponse(w, http.StatusOK, resp)
 }
 
@@ -100,8 +112,18 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cookie := http.Cookie{
+		Name:     "access_token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   3600 * 24,
+	}
+	http.SetCookie(w, &cookie)
+
 	resp := dto.AuthResponse{
-		Token: token,
 		User: dto.User{
 			ID:                     user.ID,
 			Username:               user.Username,
@@ -140,4 +162,20 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 		CompletedHardScenarios: user.CompletedHardScenarios,
 	}
 	writeResponse(w, http.StatusOK, userResp)
+}
+
+func (h *UserHandler) LogoutUser(w http.ResponseWriter, r *http.Request) {
+	cookie := http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
+		Expires:  time.Unix(0, 0),
+	}
+
+	http.SetCookie(w, &cookie)
+	w.WriteHeader(http.StatusNoContent)
 }

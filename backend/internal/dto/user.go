@@ -6,8 +6,7 @@ type AuthRequest struct {
 }
 
 type AuthResponse struct {
-	Token string `json:"token"`
-	User  User   `json:"user"`
+	User User `json:"user"`
 }
 type User struct {
 	ID                     string `json:"user_id"`

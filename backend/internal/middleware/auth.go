@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"strings"
 )
 
 const CodeUnauthorized = "UNAUTHORIZED"
@@ -21,25 +20,13 @@ type TokenValidator interface {
 func AuthMiddleware(tv TokenValidator) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" {
-				writeUnauthorized(w, domain.ErrMissingAuthHeader)
+			cookie, err := r.Cookie("access_token")
+			if err != nil {
+				writeUnauthorized(w, err)
 				return
 			}
 
-			parts := strings.SplitN(authHeader, " ", 2)
-			if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
-				writeUnauthorized(w, domain.ErrInvalidAuthHeader)
-				return
-			}
-
-			tokenString := strings.TrimSpace(parts[1])
-			if tokenString == "" {
-				writeUnauthorized(w, domain.ErrInvalidAuthHeader)
-				return
-			}
-
-			userID, err := tv.ValidateToken(tokenString)
+			userID, err := tv.ValidateToken(cookie.Value)
 			if err != nil {
 				writeUnauthorized(w, domain.ErrInvalidToken)
 				return

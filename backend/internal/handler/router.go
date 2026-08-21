@@ -28,7 +28,10 @@ func NewRouter(userHandler *UserHandler, scenarioHandler *ScenarioHandler, tv mi
 	router.Use(middle.Timeout(60 * time.Second))
 
 	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedOrigins: []string{
+			"http://localhost:3000",
+			"http://localhost:8080",
+		},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
@@ -50,6 +53,12 @@ func NewRouter(userHandler *UserHandler, scenarioHandler *ScenarioHandler, tv mi
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/register", userHandler.RegisterUser)
 			r.Post("/login", userHandler.LoginUser)
+
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.AuthMiddleware(tv))
+
+				r.Post("/logout", userHandler.LogoutUser)
+			})
 		})
 
 		r.Group(func(r chi.Router) {
