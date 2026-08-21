@@ -63,8 +63,18 @@ func (h *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cookie := http.Cookie{
+		Name:     "access_token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   3600 * 24,
+	}
+	http.SetCookie(w, &cookie)
+
 	resp := dto.AuthResponse{
-		Token: token,
 		User: dto.User{
 			ID:                     user.ID,
 			Username:               user.Username,
@@ -74,6 +84,7 @@ func (h *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 			CompletedHardScenarios: user.CompletedHardScenarios,
 		},
 	}
+
 	writeResponse(w, http.StatusOK, resp)
 }
 
@@ -100,8 +111,18 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cookie := http.Cookie{
+		Name:     "access_token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   3600 * 24,
+	}
+	http.SetCookie(w, &cookie)
+
 	resp := dto.AuthResponse{
-		Token: token,
 		User: dto.User{
 			ID:                     user.ID,
 			Username:               user.Username,
