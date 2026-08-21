@@ -8,7 +8,7 @@ paths:
   /api/auth/register:
     post:
       summary: Регистрация нового пользователя
-      description: Принимает учетные данные, создает пользователя и возвращает JWT-токен.
+      description: Принимает учетные данные, создает пользователя и устанавливает JWT-токен в HttpOnly cookie.
       tags:
         - Auth
       requestBody:
@@ -20,6 +20,11 @@ paths:
       responses:
         '200':
           description: Успешная регистрация
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: access_token=eyJhbGciOi...; Path=/; HttpOnly; SameSite=Lax
           content:
             application/json:
               schema:
@@ -67,7 +72,7 @@ paths:
   /api/auth/login:
     post:
       summary: Вход в систему
-      description: Проверяет логин/пароль и возвращает JWT-токен.
+      description: Проверяет логин/пароль и устанавливает JWT-токен в HttpOnly cookie.
       tags:
         - Auth
       requestBody:
@@ -79,6 +84,11 @@ paths:
       responses:
         '200':
           description: Успешная авторизация
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: access_token=eyJhbGciOi...; Path=/; HttpOnly; SameSite=Lax
           content:
             application/json:
               schema:
@@ -108,13 +118,45 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/auth/logout:
+    post:
+      summary: Выход из системы
+      description: Очищает авторизационную куку access_token на стороне клиента.
+      tags:
+        - Auth
+      security:
+        - CookieAuth: []
+      responses:
+        '204':
+          description: Успешный выход из системы (кука сброшена)
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: access_token=; Path=/; Max-Age=0; HttpOnly
+        '401':
+          description: Ошибка авторизации (пользователь не залогинен)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /api/users/me:
     get:
       summary: Получить данные о текущем пользователе
       tags:
         - Users
       security:
-        - BearerAuth: []
+        - CookieAuth: []
       responses:
         '200':
           description: Информация о пользователе
@@ -151,14 +193,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-
   /api/scenarios:
     get:
       summary: Получить список доступных сценариев
       tags:
         - Scenarios
       security:
-        - BearerAuth: []
+        - CookieAuth: []
       parameters:
         - name: role
           in: query
@@ -197,7 +238,7 @@ paths:
       tags:
         - Scenarios
       security:
-        - BearerAuth: []
+        - CookieAuth: []
       parameters:
         - $ref: '#/components/parameters/ScenarioID'
       responses:
@@ -247,7 +288,7 @@ paths:
       tags:
         - Scenarios
       security:
-        - BearerAuth: []
+        - CookieAuth: []
       parameters:
         - $ref: '#/components/parameters/ScenarioID'
       responses:
@@ -297,7 +338,7 @@ paths:
       tags:
         - Scenarios
       security:
-        - BearerAuth: []
+        - CookieAuth: []
       parameters:
         - $ref: '#/components/parameters/ScenarioID'
       requestBody:
@@ -353,7 +394,7 @@ paths:
       tags:
         - Scenarios
       security:
-        - BearerAuth: []
+        - CookieAuth: []
       parameters:
         - $ref: '#/components/parameters/ScenarioID'
       requestBody:
@@ -405,7 +446,7 @@ paths:
       tags:
         - Leaderboard
       security:
-        - BearerAuth: []
+        - CookieAuth: []
       responses:
         '200':
           description: Список пользователей в лидерборде
@@ -433,10 +474,10 @@ paths:
 
 components:
   securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
 
   parameters:
     ScenarioID:
@@ -465,12 +506,8 @@ components:
     AuthResponse:
       type: object
       required:
-        - token
         - user
       properties:
-        token:
-          type: string
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         user:
           $ref: '#/components/schemas/User'
 
