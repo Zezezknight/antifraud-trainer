@@ -1,11 +1,13 @@
 import logoDark from '@/assets/avito-antifraud-logo.svg';
 import logoLight from '@/assets/avito-antifraud-logo-dark.svg';
 import { Link } from 'react-router';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { useTheme } from './ThemeProvider';
 import { ModeToggle } from './ModeToggle';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { profileQuery } from '@/queries/profile';
+import { Suspense } from 'react';
+import ProfileBadgeSkeleton from './skeletons/ProfileBadgeSkeleton';
 
 function NavigationBar() {
   const { theme } = useTheme();
@@ -31,7 +33,10 @@ function NavigationBar() {
           />
         </Link>
         <div className="flex items-center gap-4">
-          <ProfileBadge />
+          <Suspense fallback={<ProfileBadgeSkeleton />}>
+            <ProfileBadge />
+          </Suspense>
+
           <ModeToggle />
         </div>
       </div>
@@ -55,7 +60,6 @@ function ProfileBadge() {
       </div>
       <Avatar size="lg">
         <AvatarImage src={`/${profile.status}.png`} />
-        <AvatarFallback>{profile.status}</AvatarFallback>
       </Avatar>
     </Link>
   );
