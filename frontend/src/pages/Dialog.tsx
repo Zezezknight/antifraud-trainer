@@ -192,7 +192,7 @@ function Dialog() {
                 {shuffleArray(currentOptions).map(option => (
                   <div
                     key={option.id}
-                    className={`transition-colors bg-muted border-border ${isOpponentTyping ? 'flex items-center justify-center text-muted-foreground' : 'hover:bg-primary/20 hover:border-primary cursor-pointer'} border rounded-lg px-4 py-3`}
+                    className={`transition-colors bg-muted border-border ${isOpponentTyping ? 'flex items-center justify-center text-muted-foreground' : 'hover:bg-primary-subtle hover:border-primary cursor-pointer'} border rounded-lg px-4 py-3`}
                     onClick={() => void handleOptionChoise(option)}
                   >
                     {isOpponentTyping ? (

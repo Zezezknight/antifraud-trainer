@@ -273,7 +273,7 @@ function Leaderboard() {
               <TableRow
                 className={`flex items-center rounded-2xl ${
                   row.user.id === user?.id
-                    ? 'bg-primary/10 border! border-primary hover:bg-primary/20'
+                    ? 'bg-primary/10 border! border-primary hover:bg-primary-subtle'
                     : 'border border-transparent'
                 }`}
               >

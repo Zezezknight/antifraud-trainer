@@ -33,9 +33,9 @@ function ScenarioCard({ scenario }: ScenarioCardProps) {
                 className="text-primary"
                 fallback={() =>
                   scenario.role === 'seller' ? (
-                    <ShoppingCart className="text-primary/20" />
+                    <ShoppingCart className="text-primary-subtle" />
                   ) : (
-                    <Store className="text-primary/20" />
+                    <Store className="text-primary-subtle" />
                   )
                 }
               />
@@ -44,7 +44,7 @@ function ScenarioCard({ scenario }: ScenarioCardProps) {
             )
           }
           variants="lg"
-          backgroundColor={available ? 'bg-primary/20' : 'bg-muted'}
+          backgroundColor={available ? 'bg-primary-subtle' : 'bg-muted'}
         />
         <span className="inline-block rounded-lg border-border border-2 bg-background text-sm font-medium px-2.5 py-0.5">
           {scenario.difficulty === 'easy' ? 'Лёгкий' : 'Сложный'}
