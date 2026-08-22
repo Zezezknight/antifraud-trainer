@@ -53,6 +53,7 @@ func NewRouter(userHandler *UserHandler, scenarioHandler *ScenarioHandler, tv mi
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/register", userHandler.RegisterUser)
 			r.Post("/login", userHandler.LoginUser)
+			r.Post("/refresh", userHandler.RefreshTokens)
 
 			r.Group(func(r chi.Router) {
 				r.Use(middleware.AuthMiddleware(tv))
