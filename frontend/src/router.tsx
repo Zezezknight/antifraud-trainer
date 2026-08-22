@@ -19,6 +19,7 @@ import HomePageSkeleton from './components/skeletons/HomePageSkeleton';
 import NavigationBarLayout from './layouts/NavigationBarLayout';
 import ProfilePageSkeleton from './components/skeletons/ProfilePageSkeleton';
 import DialogPageSkeleton from './components/skeletons/DialogPageSkeleton';
+import { navigationBarLoader } from './loaders/navigation-bar';
 
 export const router = createBrowserRouter([
   {
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
           {
             // Страницы, которые используют внутри себя навигационное меню
             element: <NavigationBarLayout />,
+            loader: navigationBarLoader(queryClient),
             children: [
               {
                 index: true, // Главная страница (/)
