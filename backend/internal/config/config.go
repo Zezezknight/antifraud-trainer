@@ -9,21 +9,30 @@ import (
 )
 
 type Config struct {
-	Host      string
-	Port      int
-	DSN       string
-	JWTSecret string
+	AppHost       string
+	AppPort       int
+	RedisHost     string
+	RedisPort     string
+	RedisPassword string
+	DSN           string
+	JWTSecret     string
 }
 
 func (c *Config) Validate() error {
-	if c.Port < 1 || c.Port > 65535 {
-		return fmt.Errorf("incorrect port: %d", c.Port)
+	if c.AppPort < 1 || c.AppPort > 65535 {
+		return fmt.Errorf("incorrect port: %d", c.AppPort)
 	}
 	if c.DSN == "" {
 		return fmt.Errorf("dsn can not be empty")
 	}
 	if c.JWTSecret == "" {
 		return fmt.Errorf("jwt secret can not be empty")
+	}
+	if c.RedisHost == "" {
+		return fmt.Errorf("redis host can not be empty")
+	}
+	if c.RedisPassword == "" {
+		return fmt.Errorf("redis password can not be empty")
 	}
 	return nil
 }
@@ -40,10 +49,13 @@ func Load() (*Config, error) {
 	}
 
 	conf := Config{
-		Host:      host,
-		Port:      portNum,
-		DSN:       os.Getenv("DSN"),
-		JWTSecret: os.Getenv("JWT_SECRET"),
+		AppHost:       host,
+		AppPort:       portNum,
+		RedisHost:     os.Getenv("REDIS_HOST"),
+		RedisPort:     os.Getenv("REDIS_PORT"),
+		RedisPassword: os.Getenv("REDIS_PASSWORD"),
+		DSN:           os.Getenv("DSN"),
+		JWTSecret:     os.Getenv("JWT_SECRET"),
 	}
 
 	if err = conf.Validate(); err != nil {
