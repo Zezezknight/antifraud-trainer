@@ -42,19 +42,30 @@ func main() {
 		log.Fatal(err)
 	}
 
+	slog.Info("Подключаюсь к Redis...")
+	redisClient, err := repository.NewRedisClient(conf.RedisHost, conf.RedisPort, conf.RedisPassword)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		_ = redisClient.Close()
+	}()
+
 	slog.Info("Создаю структуры...")
+	tokenManager := auth.NewTokenManager(15*time.Minute, conf.JWTSecret)
 	userRepo := repository.NewUserRepository(db)
 	scenarioRepo := repository.NewScenarioRepository(db)
+	sessionRepo := repository.NewSessionRepository(redisClient)
+	authService := service.NewAuthService(sessionRepo, tokenManager)
 	userService := service.NewUserService(userRepo)
 	scenarioService := service.NewScenarioService(userRepo, scenarioRepo)
-	tokenManager := auth.NewTokenManager(24*time.Hour, conf.JWTSecret)
 
-	userHandler := handler.NewUserHandler(userService, tokenManager)
+	userHandler := handler.NewUserHandler(userService, authService, tokenManager)
 	scenarioHandler := handler.NewScenarioHandler(scenarioService)
 	router := handler.NewRouter(userHandler, scenarioHandler, tokenManager)
 
 	srv := &http.Server{
-		Addr:    net.JoinHostPort(conf.Host, strconv.Itoa(conf.Port)),
+		Addr:    net.JoinHostPort(conf.AppHost, strconv.Itoa(conf.AppPort)),
 		Handler: router,
 	}
 

@@ -21,14 +21,22 @@ type UserService interface {
 	GetUserByID(ctx context.Context, id string) (*domain.User, error)
 }
 
+type AuthService interface {
+	RefreshTokens(ctx context.Context, oldRefreshToken string) (domain.Tokens, error)
+	CreateSession(ctx context.Context, userID string) (string, error)
+	RevokeSession(ctx context.Context, refreshToken string) error
+}
+
 type UserHandler struct {
 	userService    UserService
+	authService    AuthService
 	tokenGenerator TokenGenerator
 }
 
-func NewUserHandler(userService UserService, tokenGenerator TokenGenerator) *UserHandler {
+func NewUserHandler(userService UserService, authService AuthService, tokenGenerator TokenGenerator) *UserHandler {
 	return &UserHandler{
 		userService:    userService,
+		authService:    authService,
 		tokenGenerator: tokenGenerator,
 	}
 }
@@ -58,22 +66,19 @@ func (h *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.tokenGenerator.GenerateToken(user.ID)
+	accessToken, err := h.tokenGenerator.GenerateToken(user.ID)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}
 
-	cookie := http.Cookie{
-		Name:     "access_token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   3600 * 24,
+	refreshToken, err := h.authService.CreateSession(r.Context(), user.ID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
+		return
 	}
-	http.SetCookie(w, &cookie)
+
+	h.setAuthCookies(w, accessToken, refreshToken)
 
 	resp := dto.AuthResponse{
 		User: dto.User{
@@ -106,22 +111,19 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.tokenGenerator.GenerateToken(user.ID)
+	accessToken, err := h.tokenGenerator.GenerateToken(user.ID)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
 		return
 	}
 
-	cookie := http.Cookie{
-		Name:     "access_token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   3600 * 24,
+	refreshToken, err := h.authService.CreateSession(r.Context(), user.ID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, CodeInternalError, MessageInternalError, err)
+		return
 	}
-	http.SetCookie(w, &cookie)
+
+	h.setAuthCookies(w, accessToken, refreshToken)
 
 	resp := dto.AuthResponse{
 		User: dto.User{
@@ -165,7 +167,11 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) LogoutUser(w http.ResponseWriter, r *http.Request) {
-	cookie := http.Cookie{
+	if refreshCookie, err := r.Cookie("refresh_token"); err == nil {
+		_ = h.authService.RevokeSession(r.Context(), refreshCookie.Value)
+	}
+
+	http.SetCookie(w, &http.Cookie{
 		Name:     "access_token",
 		Value:    "",
 		Path:     "/",
@@ -174,8 +180,58 @@ func (h *UserHandler) LogoutUser(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   -1,
 		Expires:  time.Unix(0, 0),
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Path:     "/api/auth/refresh",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
+		Expires:  time.Unix(0, 0),
+	})
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *UserHandler) RefreshTokens(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("refresh_token")
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, CodeUnauthorized, MessageUnauthorized, err)
+		return
 	}
 
-	http.SetCookie(w, &cookie)
-	w.WriteHeader(http.StatusNoContent)
+	tokens, err := h.authService.RefreshTokens(r.Context(), cookie.Value)
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, CodeUnauthorized, MessageUnauthorized, err)
+		return
+	}
+
+	h.setAuthCookies(w, tokens.AccessToken, tokens.RefreshToken)
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *UserHandler) setAuthCookies(w http.ResponseWriter, accessToken, refreshToken string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access_token",
+		Value:    accessToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   15 * 60,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Path:     "/api/auth/refresh",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   3600 * 24 * 7,
+	})
 }

@@ -22,11 +22,28 @@ services:
     ports:
       - '8081:8080'
 
+  redis:
+    image: redis:8-alpine
+    restart: always
+    command: redis-server --save 60 1 --loglevel notice --requirepass redis_password
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -a redis_password ping | grep PONG" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
   backend:
     build:
       context: ./backend/
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     ports:
       - '8080:8080'
@@ -41,3 +58,4 @@ services:
 
 volumes:
   pgdata:
+  redis_data:

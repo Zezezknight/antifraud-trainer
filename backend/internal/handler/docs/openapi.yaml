@@ -8,7 +8,7 @@ paths:
   /api/auth/register:
     post:
       summary: Регистрация нового пользователя
-      description: Принимает учетные данные, создает пользователя и устанавливает JWT-токен в HttpOnly cookie.
+      description: Принимает учетные данные, создает пользователя и устанавливает JWT access_token и refresh_token в HttpOnly cookies.
       tags:
         - Auth
       requestBody:
@@ -23,8 +23,12 @@ paths:
           headers:
             Set-Cookie:
               schema:
-                type: string
-                example: access_token=eyJhbGciOi...; Path=/; HttpOnly; SameSite=Lax
+                type: array
+                items:
+                  type: string
+                example:
+                  - access_token=eyJhbGciOi...; Path=/; HttpOnly; SameSite=Lax; Max-Age=900
+                  - refresh_token=d9b0a7c4...; Path=/api/auth/refresh; HttpOnly; SameSite=Lax; Max-Age=604800
           content:
             application/json:
               schema:
@@ -72,7 +76,7 @@ paths:
   /api/auth/login:
     post:
       summary: Вход в систему
-      description: Проверяет логин/пароль и устанавливает JWT-токен в HttpOnly cookie.
+      description: Проверяет логин/пароль и устанавливает JWT access_token и refresh_token в HttpOnly cookies.
       tags:
         - Auth
       requestBody:
@@ -87,8 +91,12 @@ paths:
           headers:
             Set-Cookie:
               schema:
-                type: string
-                example: access_token=eyJhbGciOi...; Path=/; HttpOnly; SameSite=Lax
+                type: array
+                items:
+                  type: string
+                example:
+                  - access_token=eyJhbGciOi...; Path=/; HttpOnly; SameSite=Lax; Max-Age=900
+                  - refresh_token=d9b0a7c4...; Path=/api/auth/refresh; HttpOnly; SameSite=Lax; Max-Age=604800
           content:
             application/json:
               schema:
@@ -118,22 +126,60 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/auth/refresh:
+    post:
+      summary: Обновление пары токенов
+      description: Проверяет валидность refresh_token из cookie, аннулирует его и выставляет новые access_token и refresh_token.
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: Токены успешно обновлены
+          headers:
+            Set-Cookie:
+              schema:
+                type: array
+                items:
+                  type: string
+                example:
+                  - access_token=eyJhbGciOi...; Path=/; HttpOnly; SameSite=Lax; Max-Age=900
+                  - refresh_token=f8e1c2b3...; Path=/api/auth/refresh; HttpOnly; SameSite=Lax; Max-Age=604800
+        '401':
+          description: Невалидный или просроченный refresh_token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: "UNAUTHORIZED"
+                message: "отказано в доступе"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /api/auth/logout:
     post:
       summary: Выход из системы
-      description: Очищает авторизационную куку access_token на стороне клиента.
+      description: Очищает авторизационные куки access_token и refresh_token на стороне клиента, а также аннулирует сессию на бэкенде.
       tags:
         - Auth
       security:
         - CookieAuth: []
       responses:
         '204':
-          description: Успешный выход из системы (кука сброшена)
+          description: Успешный выход из системы (куки сброшены)
           headers:
             Set-Cookie:
               schema:
-                type: string
-                example: access_token=; Path=/; Max-Age=0; HttpOnly
+                type: array
+                items:
+                  type: string
+                example:
+                  - access_token=; Path=/; Max-Age=0; HttpOnly
+                  - refresh_token=; Path=/api/auth/refresh; Max-Age=0; HttpOnly
         '401':
           description: Ошибка авторизации (пользователь не залогинен)
           content:
