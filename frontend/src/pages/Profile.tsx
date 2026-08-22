@@ -30,13 +30,14 @@ import {
   type UserStatus,
 } from '@/types/profile';
 import closedStatus from '/closed.png';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, Suspense, useEffect, useState } from 'react';
 import { AUTH_STORAGE_KEY, clearUser, useUser } from '@/store/user';
 import { Button } from '@/components/ui/button';
 import { useSuspenseQueries, useSuspenseQuery } from '@tanstack/react-query';
 import { profileQuery } from '@/queries/profile';
 import { leaderboardQuery } from '@/queries/leaderboard';
 import { scenariosQuery } from '@/queries/scenarios';
+import LeaderboardSkeleton from '@/components/skeletons/LeaderboardSkeleton';
 
 interface StatsCardProps {
   icon: React.JSX.Element;
@@ -204,7 +205,9 @@ function Profile() {
         <div className="bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
           <h3 className="text-xl font-semibold">Таблица рейтинга</h3>
 
-          <Leaderboard />
+          <Suspense fallback={<LeaderboardSkeleton />}>
+            <Leaderboard />
+          </Suspense>
         </div>
       </div>
 
