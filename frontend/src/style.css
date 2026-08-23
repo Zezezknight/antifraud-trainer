@@ -130,11 +130,6 @@
   --success: oklch(63.07% 0.17635 149.229);
   --warning: oklch(75.573% 0.15292 71.474);
   --destructive: oklch(60.7% 0.22556 25.682);
-  --destructive-subtle: color-mix(
-    in oklch,
-    var(--destructive) 20%,
-    var(--background)
-  );
 }
 
 @layer base {
