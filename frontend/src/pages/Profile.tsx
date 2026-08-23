@@ -33,12 +33,19 @@ import closedStatus from '/closed.png';
 import { Fragment, Suspense, useEffect, useState } from 'react';
 import { AUTH_STORAGE_KEY, clearUser, useUser } from '@/store/user';
 import { Button } from '@/components/ui/button';
-import { useSuspenseQueries, useSuspenseQuery } from '@tanstack/react-query';
+import {
+  QueryErrorResetBoundary,
+  useSuspenseQueries,
+  useSuspenseQuery,
+} from '@tanstack/react-query';
 import { profileQuery } from '@/queries/profile';
 import { leaderboardQuery } from '@/queries/leaderboard';
 import { scenariosQuery } from '@/queries/scenarios';
 import LeaderboardSkeleton from '@/components/skeletons/LeaderboardSkeleton';
 import DataRefetchContainer from '@/components/DataRefetchContainer';
+import { ErrorBoundary } from 'react-error-boundary';
+import RouteErrorBoundary from '@/components/RouteErrorBoundary';
+import ProfilePageSkeleton from '@/components/skeletons/ProfilePageSkeleton';
 
 interface StatsCardProps {
   icon: React.JSX.Element;
@@ -47,6 +54,25 @@ interface StatsCardProps {
 }
 
 function Profile() {
+  return (
+    <QueryErrorResetBoundary>
+      {({ reset }) => (
+        <ErrorBoundary
+          onReset={reset}
+          fallbackRender={({ error, resetErrorBoundary }) => (
+            <RouteErrorBoundary error={error} onRetry={resetErrorBoundary} />
+          )}
+        >
+          <Suspense fallback={<ProfilePageSkeleton />}>
+            <ProfileContent />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+    </QueryErrorResetBoundary>
+  );
+}
+
+function ProfileContent() {
   const navigate = useNavigate();
 
   const [

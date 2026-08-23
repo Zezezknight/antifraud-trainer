@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router';
 import { ChevronLeft, CircleQuestionMark, Ellipsis, X } from 'lucide-react';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { type DialogHistory, type DialogOption } from '@/types/dialog';
 import DialogMessage from '@/components/Dialog/DialogMessage';
 import { getDialogStep, sendDialogResults } from '@/api/dialog';
@@ -8,14 +8,39 @@ import { useInvalidateRole } from '@/store/scenarios';
 import { useSetProfile } from '@/store/profile';
 import DialogResults from '@/components/Dialog/DialogResults';
 import { shuffleArray } from '@/utils/sorting';
-import { useSuspenseQueries } from '@tanstack/react-query';
+import {
+  QueryErrorResetBoundary,
+  useSuspenseQueries,
+} from '@tanstack/react-query';
 import { dialogStartQuery } from '@/queries/dialog';
 import { scenarioQuery } from '@/queries/scenarios';
 import DataRefetchContainer from '@/components/DataRefetchContainer';
+import { ErrorBoundary } from 'react-error-boundary';
+import RouteErrorBoundary from '@/components/RouteErrorBoundary';
+import DialogPageSkeleton from '@/components/skeletons/DialogPageSkeleton';
 
 const LOADING_MS = 2000;
 
 function Dialog() {
+  return (
+    <QueryErrorResetBoundary>
+      {({ reset }) => (
+        <ErrorBoundary
+          onReset={reset}
+          fallbackRender={({ error, resetErrorBoundary }) => (
+            <RouteErrorBoundary error={error} onRetry={resetErrorBoundary} />
+          )}
+        >
+          <Suspense fallback={<DialogPageSkeleton />}>
+            <DialogContent />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+    </QueryErrorResetBoundary>
+  );
+}
+
+function DialogContent() {
   const invalidateRole = useInvalidateRole();
   const setProfile = useSetProfile();
 
