@@ -238,6 +238,28 @@ function Profile() {
       </div>
 
       <div className="container-box">
+        <QueryErrorResetBoundary>
+          {({ reset }) => (
+            <ErrorBoundary
+              onReset={reset}
+              fallbackRender={({ resetErrorBoundary }) => (
+                <div className="relative">
+                  <LeaderboardSkeleton />
+                  <DataRefetchContainer
+                    isError
+                    isFetching={false}
+                    refetch={resetErrorBoundary}
+                    offset={8}
+                  />
+                </div>
+              )}
+            >
+              <Suspense fallback={<LeaderboardSkeleton />}>
+                <Leaderboard />
+              </Suspense>
+            </ErrorBoundary>
+          )}
+        </QueryErrorResetBoundary>
       </div>
 
       <div className="container-box pb-12 flex items-center justify-center">
