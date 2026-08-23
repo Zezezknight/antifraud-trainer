@@ -6,6 +6,7 @@ export function dialogStartQuery(scenarioId: number) {
   return queryOptions({
     queryKey: ['dialog', scenarioId, 'start'],
     queryFn: () => getDialogStart(scenarioId),
+    staleTime: Infinity,
   });
 }
 
