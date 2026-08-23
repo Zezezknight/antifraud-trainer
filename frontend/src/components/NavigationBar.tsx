@@ -4,11 +4,15 @@ import { Link } from 'react-router';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { useTheme } from './ThemeProvider';
 import { ModeToggle } from './ModeToggle';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import {
+  QueryErrorResetBoundary,
+  useSuspenseQuery,
+} from '@tanstack/react-query';
 import { profileQuery } from '@/queries/profile';
 import { Suspense } from 'react';
 import ProfileBadgeSkeleton from './skeletons/ProfileBadgeSkeleton';
 import DataRefetchContainer from './DataRefetchContainer';
+import { ErrorBoundary } from 'react-error-boundary';
 
 function NavigationBar() {
   const { theme } = useTheme();
@@ -34,9 +38,28 @@ function NavigationBar() {
           />
         </Link>
         <div className="flex items-center gap-4">
-          <Suspense fallback={<ProfileBadgeSkeleton />}>
-            <ProfileBadge />
-          </Suspense>
+          <QueryErrorResetBoundary>
+            {({ reset }) => (
+              <ErrorBoundary
+                onReset={reset}
+                fallbackRender={({ resetErrorBoundary }) => (
+                  <div className="relative">
+                    <ProfileBadgeSkeleton />
+                    <DataRefetchContainer
+                      isError
+                      refetch={resetErrorBoundary}
+                      isFetching={false}
+                      offset={-8}
+                    />
+                  </div>
+                )}
+              >
+                <Suspense fallback={<ProfileBadgeSkeleton />}>
+                  <ProfileBadge />
+                </Suspense>
+              </ErrorBoundary>
+            )}
+          </QueryErrorResetBoundary>
 
           <ModeToggle />
         </div>
