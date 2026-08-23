@@ -66,7 +66,7 @@ export function LoginForm() {
         return;
       }
 
-      setError('не удалось зарегистрироваться');
+      setError('не удалось войти');
     }
   }
 
