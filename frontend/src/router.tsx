@@ -20,6 +20,7 @@ import NavigationBarLayout from './layouts/NavigationBarLayout';
 import ProfilePageSkeleton from './components/skeletons/ProfilePageSkeleton';
 import DialogPageSkeleton from './components/skeletons/DialogPageSkeleton';
 import { navigationBarLoader } from './loaders/navigation-bar';
+import RouteErrorBoundary from './components/RouteErrorBoundary';
 
 export const router = createBrowserRouter([
   {
@@ -53,12 +54,35 @@ export const router = createBrowserRouter([
                 element: <Home />,
                 hydrateFallbackElement: <HomePageSkeleton />,
                 loader: homeLoader(queryClient),
+                ErrorBoundary: RouteErrorBoundary,
+                handle: {
+                  errorContent: {
+                    500: {
+                      description:
+                        'Не удалось загрузить данные сценариев. Повторите попытку позже.',
+                    },
+                  },
+                },
               },
               {
                 path: '/profile',
                 element: <Profile />,
                 hydrateFallbackElement: <ProfilePageSkeleton />,
                 loader: profileLoader(queryClient),
+                ErrorBoundary: RouteErrorBoundary,
+                handle: {
+                  errorContent: {
+                    500: {
+                      description:
+                        'Не удалось загрузить данные профиля. Повторите попытку позже.',
+                    },
+                    404: {
+                      title: 'Пользователь не найден',
+                      description:
+                        'Пользователь с таким ID не существует или был удален.',
+                    },
+                  },
+                },
               },
             ],
           },
@@ -71,10 +95,23 @@ export const router = createBrowserRouter([
                   const location = useLocation();
                   return <Dialog key={location.key} />;
                 },
-                hydrateFallbackElement: <DialogPageSkeleton />,
                 loader: dialogLoader(queryClient),
                 shouldRevalidate: () => true,
-                errorElement: <NotFoundPage />,
+                hydrateFallbackElement: <DialogPageSkeleton />,
+                ErrorBoundary: RouteErrorBoundary,
+                handle: {
+                  errorContent: {
+                    500: {
+                      description:
+                        'Не удалось начать диалог. Повторите попытку позже.',
+                    },
+                    404: {
+                      title: 'Сценарий не найден',
+                      description:
+                        'Сценарий с таким ID не существует или был удален.',
+                    },
+                  },
+                },
               },
             ],
           },
