@@ -32,11 +32,21 @@ export const DEFAULT_ERROR_CONTENT: Record<number, ErrorContent> = {
   },
 };
 
-function RouteErrorBoundary() {
-  const error = useRouteError();
+interface RouteErrorBoundaryProps {
+  error?: unknown;
+  onRetry?: () => void;
+}
+
+function RouteErrorBoundary({
+  error: errorProp,
+  onRetry,
+}: RouteErrorBoundaryProps = {}) {
+  const routeError = useRouteError();
   const navigate = useNavigate();
   const revalidator = useRevalidator();
   const matches = useMatches();
+
+  const error = errorProp ?? routeError;
 
   const status = isRouteErrorResponse(error) ? error.status : 500;
   const handle = matches.at(-1)?.handle as RouteHandle | undefined;
@@ -51,6 +61,12 @@ function RouteErrorBoundary() {
         ...handle?.errorContent?.[status],
       }
     : (DEFAULT_ERROR_CONTENT[status] ?? DEFAULT_ERROR_CONTENT[500]);
+
+  function handleRetry() {
+    if (status === 404) return void navigate(-1);
+    if (onRetry) return onRetry();
+    void revalidator.revalidate();
+  }
 
   return (
     <div className="flex flex-col flex-1 justify-center">
@@ -67,10 +83,7 @@ function RouteErrorBoundary() {
             className="cursor-pointer"
             variant="default"
             size="lg"
-            onClick={() => {
-              if (status === 404) return void navigate(-1);
-              return void revalidator.revalidate();
-            }}
+            onClick={handleRetry}
           >
             {status === 404 ? 'Назад' : 'Повторить'}
           </Button>
