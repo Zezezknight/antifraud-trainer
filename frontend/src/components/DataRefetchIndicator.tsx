@@ -30,7 +30,7 @@ function DataRefetchIndicator(props: DataRefetchIndicatorProps) {
         render={
           <Button
             variant="outline"
-            className="bg-background! size-8 rounded-full cursor-pointer border-none"
+            className="bg-background! size-8 rounded-full cursor-pointer"
           >
             {props.isError ? (
               <X className="size-6 text-destructive" />
@@ -62,7 +62,7 @@ function DataRefetchIndicator(props: DataRefetchIndicatorProps) {
               <Button
                 variant="destructive"
                 onClick={props.onRetry}
-                className="text-xs font-medium cursor-pointer bg-destructive hover:bg-destructive/60 text-background rounded-md"
+                className="text-xs font-medium cursor-pointer bg-destructive! hover:bg-destructive/60! text-white rounded-md"
               >
                 Повторить
               </Button>
