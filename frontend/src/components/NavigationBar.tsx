@@ -8,6 +8,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { profileQuery } from '@/queries/profile';
 import { Suspense } from 'react';
 import ProfileBadgeSkeleton from './skeletons/ProfileBadgeSkeleton';
+import DataRefetchContainer from './DataRefetchContainer';
 
 function NavigationBar() {
   const { theme } = useTheme();
@@ -45,23 +46,37 @@ function NavigationBar() {
 }
 
 function ProfileBadge() {
-  const { data: profile } = useSuspenseQuery(profileQuery());
+  const {
+    data: profile,
+    isFetching,
+    isError,
+    refetch,
+  } = useSuspenseQuery(profileQuery());
 
   return (
-    <Link
-      to="/profile"
-      className="inline-flex items-center gap-2 sm:px-3 sm:py-1.5 rounded-2xl border-2 border-border bg-background"
-    >
-      <div className="hidden sm:visible sm:flex sm:flex-col sm:items-end ">
-        <span className="text-base font-bold">{profile.points}</span>
-        <span className="text-xs font-medium text-muted-foreground text-right">
-          {profile.status}
-        </span>
-      </div>
-      <Avatar size="lg">
-        <AvatarImage src={`/${profile.status}.png`} />
-      </Avatar>
-    </Link>
+    <div className="relative">
+      <Link
+        to="/profile"
+        className="inline-flex items-center gap-2 sm:px-3 sm:py-1.5 rounded-2xl border-2 border-border bg-background"
+      >
+        <div className="hidden sm:visible sm:flex sm:flex-col sm:items-end ">
+          <span className="text-base font-bold">{profile.points}</span>
+          <span className="text-xs font-medium text-muted-foreground text-right">
+            {profile.status}
+          </span>
+        </div>
+        <Avatar size="lg">
+          <AvatarImage src={`/${profile.status}.png`} />
+        </Avatar>
+      </Link>
+
+      <DataRefetchContainer
+        offset={-8}
+        isFetching={isFetching}
+        isError={isError}
+        refetch={() => void refetch()}
+      />
+    </div>
   );
 }
 

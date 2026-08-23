@@ -11,6 +11,7 @@ import { shuffleArray } from '@/utils/sorting';
 import { useSuspenseQueries } from '@tanstack/react-query';
 import { dialogStartQuery } from '@/queries/dialog';
 import { scenarioQuery } from '@/queries/scenarios';
+import DataRefetchContainer from '@/components/DataRefetchContainer';
 
 const LOADING_MS = 2000;
 
@@ -21,7 +22,15 @@ function Dialog() {
   const { scenarioId: scenarioIdRow } = useParams();
   const scenarioId = Number(scenarioIdRow);
 
-  const [{ data: dialogStart }, { data: scenario }] = useSuspenseQueries({
+  const [
+    { data: dialogStart },
+    {
+      data: scenario,
+      isFetching: scenarioIsFetching,
+      isError: scenarioIsError,
+      refetch: scenarioRefetch,
+    },
+  ] = useSuspenseQueries({
     queries: [dialogStartQuery(scenarioId), scenarioQuery(scenarioId)],
   });
 
@@ -115,7 +124,7 @@ function Dialog() {
         <DialogResults scenario={scenario} history={dialogHistory} />
       )}
       <div className="h-screen flex flex-col gap-4">
-        <div className="shadow-sm">
+        <div className="relative shadow-sm">
           <div className="bg-background py-4">
             <div className="container-box flex items-center gap-4">
               <Link to="/">
@@ -151,6 +160,13 @@ function Dialog() {
               </div>
             </div>
           ) : null}
+
+          <DataRefetchContainer
+            offset={8}
+            isFetching={scenarioIsFetching}
+            isError={scenarioIsError}
+            refetch={() => void scenarioRefetch()}
+          />
         </div>
 
         <div
