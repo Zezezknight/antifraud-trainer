@@ -8,9 +8,6 @@ export function mapLoaderError(err: unknown) {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     throw redirect('/login');
   }
-  if (isAxiosError(err) && err.response?.status === 403) {
-    throw new Response('Forbidden', { status: 403 });
-  }
   if (isAxiosError(err) && err.response?.status === 404) {
     throw new Response('Not Found', { status: 404 });
   }
