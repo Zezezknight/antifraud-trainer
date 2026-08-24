@@ -138,6 +138,9 @@ function DialogContent() {
 
         if (finalStatus != '') {
           try {
+            // Отображаем модальное окно результата
+            setModalResultsShown(true);
+
             await sendDialogResultsMutation.mutateAsync({
               scenarioId: scenario.id,
               status: finalStatus,
@@ -155,9 +158,6 @@ function DialogContent() {
                 queryKey: profileQuery().queryKey,
               }),
             ]);
-
-            // Отображаем модальное окно результата
-          setModalResultsShown(true);
           } catch (error) {
             console.log(
               `Ошибка при отправке результатов сценария с ID=${scenario.id}`,
@@ -177,7 +177,7 @@ function DialogContent() {
         (sendDialogResultsMutation.isPending ? (
           <DialogResultsSkeleton />
         ) : (
-        <DialogResults scenario={scenario} history={dialogHistory} />
+          <DialogResults scenario={scenario} history={dialogHistory} />
         ))}
       <div className="h-screen flex flex-col gap-4">
         <div className="relative shadow-sm">
