@@ -3,21 +3,25 @@ import { ChevronLeft, CircleQuestionMark, Ellipsis, X } from 'lucide-react';
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { type DialogHistory, type DialogOption } from '@/types/dialog';
 import DialogMessage from '@/components/Dialog/DialogMessage';
-import { getDialogStep, sendDialogResults } from '@/api/dialog';
-import { useInvalidateRole } from '@/store/scenarios';
-import { useSetProfile } from '@/store/profile';
 import DialogResults from '@/components/Dialog/DialogResults';
 import { shuffleArray } from '@/utils/sorting';
 import {
   QueryErrorResetBoundary,
+  useQueryClient,
   useSuspenseQueries,
 } from '@tanstack/react-query';
-import { dialogStartQuery } from '@/queries/dialog';
-import { scenarioQuery } from '@/queries/scenarios';
+import {
+  dialogStartQuery,
+  useDialogStepMutation,
+  useSendDialogResultsMutation,
+} from '@/queries/dialog';
+import { scenarioQuery, scenariosQuery } from '@/queries/scenarios';
 import DataRefetchContainer from '@/components/DataRefetchContainer';
 import { ErrorBoundary } from 'react-error-boundary';
 import RouteErrorBoundary from '@/components/RouteErrorBoundary';
 import DialogPageSkeleton from '@/components/skeletons/DialogPageSkeleton';
+import { profileQuery } from '@/queries/profile';
+import DialogResultsSkeleton from '@/components/skeletons/DialogResultsSkeleton';
 
 const LOADING_MS = 2000;
 
@@ -41,8 +45,10 @@ function Dialog() {
 }
 
 function DialogContent() {
-  const invalidateRole = useInvalidateRole();
-  const setProfile = useSetProfile();
+  const queryClient = useQueryClient();
+
+  const dialogStepMutation = useDialogStepMutation();
+  const sendDialogResultsMutation = useSendDialogResultsMutation();
 
   const { scenarioId: scenarioIdRow } = useParams();
   const scenarioId = Number(scenarioIdRow);
@@ -108,7 +114,10 @@ function DialogContent() {
     ]);
 
     try {
-      const nextDialogStep = await getDialogStep(scenario.id, option.id);
+      const nextDialogStep = await dialogStepMutation.mutateAsync({
+        scenarioId: scenario.id,
+        optionId: option.id,
+      });
 
       setCurrentOptions(nextDialogStep.options);
       setDialogHistory(hist => [
@@ -128,14 +137,33 @@ function DialogContent() {
         const finalStatus = nextDialogStep.scenarioNode.finalStatus;
 
         if (finalStatus != '') {
-          await sendDialogResults(scenario.id, finalStatus);
+          try {
+            await sendDialogResultsMutation.mutateAsync({
+              scenarioId: scenario.id,
+              status: finalStatus,
+            });
 
-          // Очищаем, чтобы забрать новые данные с бэкенда
-          invalidateRole(scenario.role);
-          setProfile(null);
+            // Инвалидация сценариев и профиля
+            await Promise.all([
+              queryClient.invalidateQueries({
+                queryKey: scenariosQuery('buyer').queryKey,
+              }),
+              queryClient.invalidateQueries({
+                queryKey: scenariosQuery('seller').queryKey,
+              }),
+              queryClient.invalidateQueries({
+                queryKey: profileQuery().queryKey,
+              }),
+            ]);
 
           // Отображать модальное окно результата
           setModalResultsShown(true);
+          } catch (error) {
+            console.log(
+              `Ошибка при отправке результатов сценария с ID=${scenario.id}`,
+              error,
+            );
+          }
         }
       }
     } catch (error) {
@@ -145,9 +173,12 @@ function DialogContent() {
 
   return (
     <>
-      {modalResultsShown && (
+      {modalResultsShown &&
+        (sendDialogResultsMutation.isPending ? (
+          <DialogResultsSkeleton />
+        ) : (
         <DialogResults scenario={scenario} history={dialogHistory} />
-      )}
+        ))}
       <div className="h-screen flex flex-col gap-4">
         <div className="relative shadow-sm">
           <div className="bg-background py-4">
