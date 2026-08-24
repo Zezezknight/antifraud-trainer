@@ -1,10 +1,7 @@
 import { Eye, Lightbulb } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
-import { useEffect } from 'react';
 
 function DialogResultsSkeleton() {
-  useEffect(() => console.log(`I'm rendered`));
-
   return (
     <div className="absolute inset-0 z-10 bg-foreground/20 backdrop-blur-md flex items-center justify-center">
       <div className="container-box flex items-center justify-center">
