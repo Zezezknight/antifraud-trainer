@@ -81,15 +81,17 @@ function DialogContent() {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Скролл к последнему сообщению в диалоге
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({
         top: scrollContainerRef.current.scrollHeight,
-        behavior: 'smooth', // Плавный скролл
+        behavior: 'smooth',
       });
     }
   }, [dialogHistory, isOpponentTyping]);
 
+  // Стартовая анимация набора сообщения оппонента
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setIsOpponentTyping(false);
@@ -101,6 +103,7 @@ function DialogContent() {
   async function handleOptionChoise(option: DialogOption) {
     // Если оппонент "печатает", полностью игнорируем клики
     if (isOpponentTyping) return;
+    setIsOpponentTyping(true);
 
     const isOptionExists = currentOptions.some(opt => opt.id === option.id);
     if (!isOptionExists) return;
@@ -129,10 +132,7 @@ function DialogContent() {
       ]);
 
       if (!nextDialogStep.scenarioNode.isFinal) {
-        setIsOpponentTyping(true);
-        setTimeout(() => {
-          setIsOpponentTyping(false);
-        }, LOADING_MS);
+        setTimeout(() => setIsOpponentTyping(false), LOADING_MS);
       } else {
         const finalStatus = nextDialogStep.scenarioNode.finalStatus;
 
@@ -156,7 +156,7 @@ function DialogContent() {
               }),
             ]);
 
-          // Отображать модальное окно результата
+            // Отображаем модальное окно результата
           setModalResultsShown(true);
           } catch (error) {
             console.log(
