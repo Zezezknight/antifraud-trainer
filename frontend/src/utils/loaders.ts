@@ -13,3 +13,18 @@ export function mapLoaderError(err: unknown) {
   }
   throw new Response('Server Error', { status: 500 });
 }
+
+export async function processLoaderQueries(
+  critical: Promise<unknown>[],
+  nonCritical: Promise<unknown>[],
+) {
+  nonCritical.forEach(q => {
+    q.catch(() => {});
+  });
+
+  try {
+    await Promise.all(critical);
+  } catch (err) {
+    mapLoaderError(err);
+  }
+}
