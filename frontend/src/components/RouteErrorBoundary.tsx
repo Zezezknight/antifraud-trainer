@@ -69,16 +69,22 @@ function RouteErrorBoundary() {
   async function handleRetry() {
     setRetryIsPending(true);
 
-    if (status === 404) return void navigate(-1);
+    try {
+      if (status === 404) return void navigate(-1);
 
-    // Точечно инвалидируем только указанные ключи для этого роута
-    if (keys) {
-      for (const queryKey of keys) {
-        await queryClient.resetQueries({ queryKey });
+      // Точечно инвалидируем только указанные ключи для этого роута
+      if (keys) {
+        for (const queryKey of keys) {
+          await queryClient.resetQueries({ queryKey });
+        }
       }
-    }
 
-    void revalidator.revalidate();
+      await revalidator.revalidate();
+    } catch (err) {
+      console.log('Ошибка повторной попытки:', err);
+    } finally {
+      setRetryIsPending(false);
+    }
   }
 
   return (
