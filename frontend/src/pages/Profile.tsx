@@ -44,8 +44,6 @@ import { scenariosQuery } from '@/queries/scenarios';
 import LeaderboardSkeleton from '@/components/skeletons/LeaderboardSkeleton';
 import DataRefetchContainer from '@/components/DataRefetchContainer';
 import { ErrorBoundary } from 'react-error-boundary';
-import RouteErrorBoundary from '@/components/RouteErrorBoundary';
-import ProfilePageSkeleton from '@/components/skeletons/ProfilePageSkeleton';
 
 interface StatsCardProps {
   icon: React.JSX.Element;
@@ -54,25 +52,6 @@ interface StatsCardProps {
 }
 
 function Profile() {
-  return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <RouteErrorBoundary error={error} onRetry={resetErrorBoundary} />
-          )}
-        >
-          <Suspense fallback={<ProfilePageSkeleton />}>
-            <ProfileContent />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
-  );
-}
-
-function ProfileContent() {
   const navigate = useNavigate();
 
   const [

@@ -1,38 +1,11 @@
 import DataRefetchContainer from '@/components/DataRefetchContainer';
-import RouteErrorBoundary from '@/components/RouteErrorBoundary';
 import Scenarios from '@/components/Scenarios/Scenarios';
-import HomePageSkeleton from '@/components/skeletons/HomePageSkeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { scenariosQuery } from '@/queries/scenarios';
 import type { Role, Scenario } from '@/types/scenarios';
-import {
-  QueryErrorResetBoundary,
-  useSuspenseQueries,
-  useSuspenseQuery,
-} from '@tanstack/react-query';
-import { Suspense } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
+import { useSuspenseQueries, useSuspenseQuery } from '@tanstack/react-query';
 
 function Home() {
-  return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <RouteErrorBoundary error={error} onRetry={resetErrorBoundary} />
-          )}
-        >
-          <Suspense fallback={<HomePageSkeleton />}>
-            <HomeContent />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
-  );
-}
-
-function HomeContent() {
   const [
     {
       data: buyer,
