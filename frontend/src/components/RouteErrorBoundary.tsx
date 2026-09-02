@@ -3,11 +3,15 @@ import {
   Link,
   useMatches,
   useNavigate,
+  useParams,
   useRevalidator,
   useRouteError,
+  type Params,
 } from 'react-router';
 import { ServerCrash, CircleQuestionMark, type LucideIcon } from 'lucide-react';
 import { Button } from './ui/button';
+import { useQueryClient, type QueryKey } from '@tanstack/react-query';
+import { useState } from 'react';
 
 export interface ErrorContent {
   title: string;
@@ -16,7 +20,8 @@ export interface ErrorContent {
 }
 
 export interface RouteHandle {
-  errorContent: Partial<Record<number, ErrorContent>>;
+  errorContent?: Partial<Record<number, ErrorContent>>;
+  queryKeys?: QueryKey[] | ((params: Params) => QueryKey[]);
 }
 
 export const DEFAULT_ERROR_CONTENT: Record<number, ErrorContent> = {
@@ -32,24 +37,23 @@ export const DEFAULT_ERROR_CONTENT: Record<number, ErrorContent> = {
   },
 };
 
-interface RouteErrorBoundaryProps {
-  error?: unknown;
-  onRetry?: () => void;
-}
+function RouteErrorBoundary() {
+  const [retryIsPending, setRetryIsPending] = useState(false);
 
-function RouteErrorBoundary({
-  error: errorProp,
-  onRetry,
-}: RouteErrorBoundaryProps = {}) {
+  const queryClient = useQueryClient();
+  const params = useParams();
   const routeError = useRouteError();
   const navigate = useNavigate();
   const revalidator = useRevalidator();
   const matches = useMatches();
 
-  const error = errorProp ?? routeError;
-
-  const status = isRouteErrorResponse(error) ? error.status : 500;
+  const status = isRouteErrorResponse(routeError) ? routeError.status : 500;
   const handle = matches.at(-1)?.handle as RouteHandle | undefined;
+
+  const keys =
+    typeof handle?.queryKeys === 'function'
+      ? handle.queryKeys(params)
+      : handle?.queryKeys;
 
   const {
     title,
@@ -62,9 +66,18 @@ function RouteErrorBoundary({
       }
     : (DEFAULT_ERROR_CONTENT[status] ?? DEFAULT_ERROR_CONTENT[500]);
 
-  function handleRetry() {
+  async function handleRetry() {
+    setRetryIsPending(true);
+
     if (status === 404) return void navigate(-1);
-    if (onRetry) return onRetry();
+
+    // Точечно инвалидируем только указанные ключи для этого роута
+    if (keys) {
+      for (const queryKey of keys) {
+        await queryClient.resetQueries({ queryKey });
+      }
+    }
+
     void revalidator.revalidate();
   }
 
@@ -83,9 +96,14 @@ function RouteErrorBoundary({
             className="cursor-pointer"
             variant="default"
             size="lg"
-            onClick={handleRetry}
+            disabled={retryIsPending}
+            onClick={() => void handleRetry()}
           >
-            {status === 404 ? 'Назад' : 'Повторить'}
+            {retryIsPending
+              ? 'Загрузка...'
+              : status === 404
+                ? 'Назад'
+                : 'Повторить'}
           </Button>
           <Link to="/">
             <Button className="cursor-pointer" variant="outline" size="lg">
