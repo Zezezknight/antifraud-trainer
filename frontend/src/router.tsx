@@ -1,4 +1,9 @@
-import { createBrowserRouter, redirect, useLocation } from 'react-router';
+import {
+  createBrowserRouter,
+  redirect,
+  useLocation,
+  type Params,
+} from 'react-router';
 import MainLayout from './layouts/MainLayout';
 import NotFoundPage from './pages/NotFound';
 import ProtectedRoutes from './components/ProtectedRoutes';
@@ -21,6 +26,10 @@ import ProfilePageSkeleton from './components/skeletons/ProfilePageSkeleton';
 import DialogPageSkeleton from './components/skeletons/DialogPageSkeleton';
 import { navigationBarLoader } from './loaders/navigation-bar';
 import RouteErrorBoundary from './components/RouteErrorBoundary';
+import { leaderboardQueryKeyRoot } from './queries/leaderboard';
+import { scenarioQuery, scenariosQueryKeyRoot } from './queries/scenarios';
+import { profileQueryKeyRoot } from './queries/profile';
+import { dialogStartQuery } from './queries/dialog';
 
 export const router = createBrowserRouter([
   {
@@ -62,6 +71,7 @@ export const router = createBrowserRouter([
                         'Не удалось загрузить данные сценариев. Повторите попытку позже.',
                     },
                   },
+                  queryKeys: [scenariosQueryKeyRoot],
                 },
               },
               {
@@ -82,6 +92,11 @@ export const router = createBrowserRouter([
                         'Пользователь с таким ID не существует или был удален.',
                     },
                   },
+                  queryKeys: [
+                    scenariosQueryKeyRoot,
+                    leaderboardQueryKeyRoot,
+                    profileQueryKeyRoot,
+                  ],
                 },
               },
             ],
@@ -111,6 +126,10 @@ export const router = createBrowserRouter([
                         'Сценарий с таким ID не существует или был удален.',
                     },
                   },
+                  queryKeys: (params: Params) => [
+                    dialogStartQuery(Number(params['scenarioId'])).queryKey,
+                    scenarioQuery(Number(params['scenarioId'])).queryKey,
+                  ],
                 },
               },
             ],
