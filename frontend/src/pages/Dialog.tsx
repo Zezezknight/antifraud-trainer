@@ -163,12 +163,30 @@ function Dialog() {
 
   return (
     <>
-      {modalResultsShown &&
-        (sendDialogResultsMutation.isPending ? (
-          <DialogResultsSkeleton />
-        ) : (
-          <DialogResults scenario={scenario} history={dialogHistory} />
-        ))}
+      {modalResultsShown ? (
+        <>
+          {sendDialogResultsMutation.isPending && <DialogResultsSkeleton />}
+          {sendDialogResultsMutation.isSuccess && (
+            <DialogResults scenario={scenario} history={dialogHistory} />
+          )}
+          {sendDialogResultsMutation.isError && (
+            <DialogResultsSkeleton>
+              <DataRefetchContainer
+                isError={true}
+                isFetching={false}
+                offset={8}
+                refetch={() => {
+                  const lastDialogHistoryEntry = dialogHistory.at(-1);
+
+                  if (lastDialogHistoryEntry?.type === 'opponent') {
+                    void handleDialogFinish(lastDialogHistoryEntry.finalStatus);
+                  }
+                }}
+              />
+            </DialogResultsSkeleton>
+          )}
+        </>
+      ) : null}
       <div className="h-screen flex flex-col gap-4">
         <div className="relative shadow-sm">
           <div className="bg-background py-4">

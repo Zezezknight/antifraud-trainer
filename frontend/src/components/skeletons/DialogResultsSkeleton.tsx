@@ -1,12 +1,13 @@
 import { Eye, Lightbulb } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
+import type React from 'react';
 
-function DialogResultsSkeleton() {
+function DialogResultsSkeleton({ children }: { children?: React.JSX.Element }) {
   return (
     <div className="absolute inset-0 z-10 bg-foreground/20 backdrop-blur-md flex items-center justify-center">
       <div className="container-box flex items-center justify-center">
         <div
-          className="bg-background rounded-lg shadow-sm w-full max-w-175 max-h-[80vh] sm:max-h-[90vh] overflow-hidden overflow-y-auto pb-6 flex flex-col gap-6 scrollbar-thin 
+          className="relative bg-background rounded-lg shadow-sm w-full max-w-175 max-h-[80vh] sm:max-h-[90vh] overflow-hidden overflow-y-auto pb-6 flex flex-col gap-6 scrollbar-thin 
             [scrollbar-color:rgba(0,0,0,0.15)_transparent] 
             [&::-webkit-scrollbar]:w-1.5 
             [&::-webkit-scrollbar-track]:bg-muted-foreground 
@@ -59,6 +60,8 @@ function DialogResultsSkeleton() {
             <Skeleton className="flex-1 h-8 bg-muted" />
             <Skeleton className="flex-1 h-8 bg-muted" />
           </div>
+
+          {children}
         </div>
       </div>
     </div>
