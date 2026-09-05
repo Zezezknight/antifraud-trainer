@@ -1,7 +1,11 @@
 import { Link, useParams } from 'react-router';
 import { ChevronLeft, CircleQuestionMark, Ellipsis, X } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
-import { type DialogHistory, type DialogOption } from '@/types/dialog';
+import {
+  type DialogHistory,
+  type DialogNode,
+  type DialogOption,
+} from '@/types/dialog';
 import DialogMessage from '@/components/Dialog/DialogMessage';
 import DialogResults from '@/components/Dialog/DialogResults';
 import { shuffleArray } from '@/utils/sorting';
@@ -75,6 +79,38 @@ function Dialog() {
     return () => clearTimeout(timeoutId);
   }, []);
 
+  async function handleDialogFinish(finalStatus: DialogNode['finalStatus']) {
+    if (finalStatus != '') {
+      try {
+        // Отображаем модальное окно результата
+        setModalResultsShown(true);
+
+        await sendDialogResultsMutation.mutateAsync({
+          scenarioId: scenario.id,
+          status: finalStatus,
+        });
+
+        // Инвалидация сценариев и профиля
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: scenariosQuery('buyer').queryKey,
+          }),
+          queryClient.invalidateQueries({
+            queryKey: scenariosQuery('seller').queryKey,
+          }),
+          queryClient.invalidateQueries({
+            queryKey: profileQuery().queryKey,
+          }),
+        ]);
+      } catch (error) {
+        console.log(
+          `Ошибка при отправке результатов сценария с ID=${scenario.id}`,
+          error,
+        );
+      }
+    }
+  }
+
   async function handleOptionChoise(option: DialogOption, isRetry = false) {
     // Если оппонент "печатает", полностью игнорируем клики
     if (isOpponentTyping) return;
@@ -116,37 +152,7 @@ function Dialog() {
         setTimeout(() => setIsOpponentTyping(false), LOADING_MS);
       } else {
         setIsOpponentTyping(false);
-        const finalStatus = nextDialogStep.scenarioNode.finalStatus;
-
-        if (finalStatus != '') {
-          try {
-            // Отображаем модальное окно результата
-            setModalResultsShown(true);
-
-            await sendDialogResultsMutation.mutateAsync({
-              scenarioId: scenario.id,
-              status: finalStatus,
-            });
-
-            // Инвалидация сценариев и профиля
-            await Promise.all([
-              queryClient.invalidateQueries({
-                queryKey: scenariosQuery('buyer').queryKey,
-              }),
-              queryClient.invalidateQueries({
-                queryKey: scenariosQuery('seller').queryKey,
-              }),
-              queryClient.invalidateQueries({
-                queryKey: profileQuery().queryKey,
-              }),
-            ]);
-          } catch (error) {
-            console.log(
-              `Ошибка при отправке результатов сценария с ID=${scenario.id}`,
-              error,
-            );
-          }
-        }
+        void handleDialogFinish(nextDialogStep.scenarioNode.finalStatus);
       }
     } catch (error) {
       setFailedOption(option);
