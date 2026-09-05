@@ -50,6 +50,7 @@ function Dialog() {
   ]);
 
   const [isOpponentTyping, setIsOpponentTyping] = useState(true);
+  const [failedOption, setFailedOption] = useState<DialogOption | null>(null);
   const [modalResultsShown, setModalResultsShown] = useState(false);
   const [showDialogDescription, setShowDialogDescription] = useState(true);
 
@@ -74,21 +75,26 @@ function Dialog() {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  async function handleOptionChoise(option: DialogOption) {
+  async function handleOptionChoise(option: DialogOption, isRetry = false) {
     // Если оппонент "печатает", полностью игнорируем клики
     if (isOpponentTyping) return;
     setIsOpponentTyping(true);
 
     const isOptionExists = currentOptions.some(opt => opt.id === option.id);
-    if (!isOptionExists) return;
+    if (!isOptionExists) {
+      setIsOpponentTyping(false);
+      return;
+    }
 
-    setDialogHistory(hist => [
-      ...hist,
-      {
-        ...option,
-        type: 'user',
-      },
-    ]);
+    if (!isRetry) {
+      setDialogHistory(hist => [
+        ...hist,
+        {
+          ...option,
+          type: 'user',
+        },
+      ]);
+    }
 
     try {
       const nextDialogStep = await dialogStepMutation.mutateAsync({
@@ -96,6 +102,7 @@ function Dialog() {
         optionId: option.id,
       });
 
+      setFailedOption(null);
       setCurrentOptions(nextDialogStep.options);
       setDialogHistory(hist => [
         ...hist,
@@ -108,6 +115,7 @@ function Dialog() {
       if (!nextDialogStep.scenarioNode.isFinal) {
         setTimeout(() => setIsOpponentTyping(false), LOADING_MS);
       } else {
+        setIsOpponentTyping(false);
         const finalStatus = nextDialogStep.scenarioNode.finalStatus;
 
         if (finalStatus != '') {
@@ -141,6 +149,8 @@ function Dialog() {
         }
       }
     } catch (error) {
+      setFailedOption(option);
+      setIsOpponentTyping(false);
       console.log(`Ошибка при выборе опции c ID=${option.id}`, error);
     }
   }
@@ -217,16 +227,40 @@ function Dialog() {
 
             if (isOpponent && dialogItem.isFinal) return null;
 
-            return (
+            return dialogItem.type === 'opponent' ? (
               <DialogMessage
                 key={`${dialogItem.type}${dialogItem.id}`}
                 typing={isTyping}
-                type={dialogItem.type}
+                type="opponent"
                 text={dialogItem.messageText}
+              />
+            ) : (
+              <DialogMessage
+                key={`${dialogItem.type}${dialogItem.id}`}
+                typing={isTyping}
+                type="user"
+                text={dialogItem.messageText}
+                status={dialogStepMutation.status}
               />
             );
           })}
         </div>
+
+        {dialogStepMutation.isError && (
+          <div className="flex items-center justify-center gap-1 text-destructive">
+            <span>Ошибка при отправке сообщения.</span>
+            <button
+              className="underline cursor-pointer"
+              onClick={() => {
+                if (failedOption) {
+                  void handleOptionChoise(failedOption, true);
+                }
+              }}
+            >
+              Повторить
+            </button>
+          </div>
+        )}
 
         <div className="bg-background pt-2 sm:pt-4 pb-4 sm:pb-8">
           <div className="container-box flex flex-col gap-2 sm:gap-4 items-center">
@@ -239,7 +273,9 @@ function Dialog() {
                   <div
                     key={option.id}
                     className={`transition-colors bg-muted border-border ${isOpponentTyping ? 'flex items-center justify-center text-muted-foreground' : 'hover:bg-primary-subtle hover:border-primary cursor-pointer'} border rounded-lg px-4 py-3`}
-                    onClick={() => void handleOptionChoise(option)}
+                    onClick={() => {
+                      if (!failedOption) void handleOptionChoise(option);
+                    }}
                   >
                     {isOpponentTyping ? (
                       <Ellipsis
