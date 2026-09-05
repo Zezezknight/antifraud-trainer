@@ -240,7 +240,7 @@ function Dialog() {
                 typing={isTyping}
                 type="user"
                 text={dialogItem.messageText}
-                status={dialogStepMutation.status}
+                status={isLastMessage ? dialogStepMutation.status : 'success'}
               />
             );
           })}
