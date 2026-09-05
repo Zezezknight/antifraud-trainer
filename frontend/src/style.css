@@ -33,6 +33,7 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-subtle: var(--primary-subtle);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -50,6 +51,7 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-destructive: var(--destructive);
+  --color-destructive-subtle: var(--destructive-subtle);
 }
 
 :root {
@@ -60,6 +62,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.148 0.004 228.8);
   --primary: oklch(0.488 0.243 264.376);
+  --primary-subtle: color-mix(in oklch, var(--primary) 20%, white);
   --primary-foreground: oklch(0.97 0.014 254.604);
   --secondary: oklch(0.967 0.001 286.375);
   --secondary-foreground: oklch(0.21 0.006 285.885);
@@ -88,6 +91,7 @@
   --success: oklch(63.07% 0.17635 149.229);
   --warning: oklch(75.573% 0.15292 71.474);
   --destructive: oklch(60.7% 0.22556 25.682);
+  --destructive-subtle: color-mix(in oklch, var(--destructive) 20%, white);
 }
 
 .dark {
@@ -98,6 +102,7 @@
   --popover: oklch(0.218 0.008 223.9);
   --popover-foreground: oklch(0.987 0.002 197.1);
   --primary: oklch(0.424 0.199 265.638);
+  --primary-subtle: color-mix(in oklch, var(--primary) 20%, var(--background));
   --primary-foreground: oklch(0.97 0.014 254.604);
   --secondary: oklch(0.274 0.006 286.033);
   --secondary-foreground: oklch(0.985 0 0);

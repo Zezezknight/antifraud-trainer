@@ -15,7 +15,7 @@ const ListItem = ({ children }: { children: string }) => (
   </li>
 );
 
-function Auth() {
+function AuthLayout() {
   const { isAuth } = useAuth();
 
   if (isAuth) return <Navigate to="/" replace />;
@@ -53,4 +53,4 @@ function Auth() {
   );
 }
 
-export default Auth;
+export default AuthLayout;

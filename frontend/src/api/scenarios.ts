@@ -1,4 +1,4 @@
-import api from '@/service/api';
+import api from '@/api/api';
 import * as z from 'zod';
 import { ScenarioSchema, type Role, type Scenario } from '@/types/scenarios';
 

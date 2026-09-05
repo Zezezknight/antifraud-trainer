@@ -1,22 +1,20 @@
-import type { Scenario } from '@/types/scenarios';
-import { composeLoaders } from './utils';
-import { dialogStartLoader, scenarioLoader } from './loaders';
 import type { LoaderFunctionArgs } from 'react-router';
-import type { Dialog } from '@/types/dialog';
+import type { QueryClient } from '@tanstack/react-query';
+import { dialogStartQuery } from '@/queries/dialog';
+import { scenarioQuery } from '@/queries/scenarios';
+import { processLoaderQueries } from '@/utils/loaders';
 
-export interface DialogLoader {
-  scenario: Scenario;
-  dialogStart: Dialog;
-}
+export function dialogLoader(queryClient: QueryClient) {
+  return async ({ params }: LoaderFunctionArgs) => {
+    const { scenarioId: scenarioIdRow } = params;
+    const scenarioId = Number(scenarioIdRow);
 
-export function dialogLoader({
-  params,
-}: LoaderFunctionArgs): Promise<DialogLoader> {
-  const { scenarioId: scenarioIdRow } = params;
-  const scenarioId = Number(scenarioIdRow);
+    const critical = [
+      queryClient.ensureQueryData(dialogStartQuery(scenarioId)),
+      queryClient.ensureQueryData(scenarioQuery(scenarioId)),
+    ];
+    const nonCritical: Promise<unknown>[] = [];
 
-  return composeLoaders({
-    scenario: () => scenarioLoader(scenarioId),
-    dialogStart: () => dialogStartLoader(scenarioId),
-  });
+    await processLoaderQueries(critical, nonCritical);
+  };
 }

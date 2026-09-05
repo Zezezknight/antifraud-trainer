@@ -1,6 +1,4 @@
-import NavigationBar from '@/components/NavigationBar';
-import type { ProfileLoader } from '@/loaders/profile';
-import { useLoaderData, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { CircleStar, TargetIcon, CircleCheck } from 'lucide-react';
 
 import {
@@ -32,9 +30,20 @@ import {
   type UserStatus,
 } from '@/types/profile';
 import closedStatus from '/closed.png';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, Suspense, useEffect, useState } from 'react';
 import { AUTH_STORAGE_KEY, clearUser, useUser } from '@/store/user';
 import { Button } from '@/components/ui/button';
+import {
+  QueryErrorResetBoundary,
+  useSuspenseQueries,
+  useSuspenseQuery,
+} from '@tanstack/react-query';
+import { profileQuery } from '@/queries/profile';
+import { leaderboardQuery } from '@/queries/leaderboard';
+import { scenariosQuery } from '@/queries/scenarios';
+import LeaderboardSkeleton from '@/components/skeletons/LeaderboardSkeleton';
+import DataRefetchContainer from '@/components/DataRefetchContainer';
+import { ErrorBoundary } from 'react-error-boundary';
 
 interface StatsCardProps {
   icon: React.JSX.Element;
@@ -42,29 +51,38 @@ interface StatsCardProps {
   content: string;
 }
 
-function StatsCard({ icon, title, content }: StatsCardProps) {
-  return (
-    <div className="flex-1 bg-muted rounded-lg text-muted-foreground p-4">
-      <span className="mb-2 flex items-center gap-2">
-        {icon} <span className="text-lg font-medium">{title}</span>
-      </span>
-      <span className="text-xl font-bold text-foreground">{content}</span>
-    </div>
-  );
-}
-
 function Profile() {
   const navigate = useNavigate();
-  const user = useUser();
 
-  const {
-    profile: userProfile,
-    leaderboard,
-    buyer,
-    seller,
-  } = useLoaderData<ProfileLoader>();
-  const userPoints = userProfile.points;
-  const userStatus = userProfile.status;
+  const [
+    {
+      data: buyer,
+      isFetching: buyerIsFetching,
+      isError: buyerIsError,
+      refetch: buyerRefetch,
+    },
+    {
+      data: seller,
+      isFetching: sellerIsFetching,
+      isError: sellerIsError,
+      refetch: sellerRefetch,
+    },
+    {
+      data: profile,
+      isFetching: profileIsFetching,
+      isError: profileIsError,
+      refetch: profileRefetch,
+    },
+  ] = useSuspenseQueries({
+    queries: [
+      scenariosQuery<'buyer'>('buyer'),
+      scenariosQuery<'seller'>('seller'),
+      profileQuery(),
+    ],
+  });
+
+  const userPoints = profile.points;
+  const userStatus = profile.status;
 
   const statusImages: Record<UserStatus, string> = {
     Новичок: newbyeStatus,
@@ -114,15 +132,13 @@ function Profile() {
 
   return (
     <>
-      <NavigationBar points={userPoints} status={userStatus} />
-
       <div className="container-box">
-        <div className="bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
+        <div className="relative bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
           <div className="flex items-center gap-6">
             <span className="text-3xl font-bold text-white bg-primary size-20 flex items-center justify-center rounded-full">
-              {userProfile.user.name[0]}
+              {profile.user.name[0]}
             </span>
-            <h2 className="text-2xl font-bold">{userProfile.user.name}</h2>
+            <h2 className="text-2xl font-bold">{profile.user.name}</h2>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -134,14 +150,27 @@ function Profile() {
             <StatsCard
               icon={<TargetIcon />}
               title="Пройдено"
-              content={`${userProfile.completedEasyScenarios + userProfile.completedHardScenarios} / ${buyer.length + seller.length}`}
+              content={`${profile.completedEasyScenarios + profile.completedHardScenarios} / ${buyer.length + seller.length}`}
             />
           </div>
+
+          <DataRefetchContainer
+            offset={8}
+            isFetching={
+              profileIsFetching || sellerIsFetching || buyerIsFetching
+            }
+            isError={profileIsError || sellerIsError || buyerIsError}
+            refetch={() => {
+              if (profileIsError) void profileRefetch();
+              if (sellerIsError) void sellerRefetch();
+              if (buyerIsError) void buyerRefetch();
+            }}
+          />
         </div>
       </div>
 
       <div className="container-box">
-        <div className="bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
+        <div className="relative bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
           <h3 className="text-xl font-semibold">Статусы</h3>
 
           <Carousel
@@ -203,66 +232,39 @@ function Profile() {
               ></span>
             </div>
           </div>
+
+          <DataRefetchContainer
+            offset={8}
+            isFetching={profileIsFetching}
+            isError={profileIsError}
+            refetch={() => void profileRefetch()}
+          />
         </div>
       </div>
 
       <div className="container-box">
-        <div className="bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
-          <h3 className="text-xl font-semibold">Таблица рейтинга</h3>
-
-          <Table className="text-sm border-separate border-spacing-y-1">
-            <TableHeader className="font-medium">
-              <TableRow className="flex items-center border-none rounded-2xl h-12">
-                <TableHead className="w-[20%] sm:w-[15%] pl-2 flex items-center">
-                  Место
-                </TableHead>
-                <TableHead className="w-[50%] sm:w-[55%] flex items-center">
-                  Пользователь
-                </TableHead>
-                <TableHead className="w-[30%] flex items-center justify-end">
-                  Очки
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {leaderboard
-                .sort((a, b) => a.rank - b.rank)
-                .map(row => (
-                  <Fragment key={row.rank}>
-                    {row.user.id === user?.id && row.rank > 4 ? (
-                      <TableRow className="hover:bg-transparent">
-                        <TableCell className="w-full text-xl font-bold text-muted-foreground text-center">
-                          ...
-                        </TableCell>
-                      </TableRow>
-                    ) : null}
-                    <TableRow
-                      className={`flex items-center rounded-2xl ${
-                        row.user.id === user?.id
-                          ? 'bg-primary/10 border! border-primary hover:bg-primary/20'
-                          : 'border border-transparent'
-                      }`}
-                    >
-                      <TableCell className="w-[20%] sm:w-[15%] pl-6 font-medium">
-                        {row.rank}
-                      </TableCell>
-                      <TableCell className="w-[50%] sm:w-[55%] flex flex-col">
-                        <span className="font-semibold">
-                          {row.user.name} {row.user.id === user?.id && '(вы)'}
-                        </span>
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {row.status}
-                        </span>
-                      </TableCell>
-                      <TableCell className="w-[30%] font-bold text-right">
-                        {row.points}
-                      </TableCell>
-                    </TableRow>
-                  </Fragment>
-                ))}
-            </TableBody>
-          </Table>
-        </div>
+        <QueryErrorResetBoundary>
+          {({ reset }) => (
+            <ErrorBoundary
+              onReset={reset}
+              fallbackRender={({ resetErrorBoundary }) => (
+                <div className="relative">
+                  <LeaderboardSkeleton />
+                  <DataRefetchContainer
+                    isError
+                    isFetching={false}
+                    refetch={resetErrorBoundary}
+                    offset={8}
+                  />
+                </div>
+              )}
+            >
+              <Suspense fallback={<LeaderboardSkeleton />}>
+                <Leaderboard />
+              </Suspense>
+            </ErrorBoundary>
+          )}
+        </QueryErrorResetBoundary>
       </div>
 
       <div className="container-box pb-12 flex items-center justify-center">
@@ -279,6 +281,93 @@ function Profile() {
         </Button>
       </div>
     </>
+  );
+}
+
+function StatsCard({ icon, title, content }: StatsCardProps) {
+  return (
+    <div className="flex-1 bg-muted rounded-lg text-muted-foreground p-4">
+      <span className="mb-2 flex items-center gap-2">
+        {icon} <span className="text-lg font-medium">{title}</span>
+      </span>
+      <span className="text-xl font-bold text-foreground">{content}</span>
+    </div>
+  );
+}
+
+function Leaderboard() {
+  const user = useUser();
+  const {
+    data: leaderboard,
+    isFetching,
+    isError,
+    refetch,
+  } = useSuspenseQuery(leaderboardQuery());
+
+  return (
+    <div className="relative bg-background px-5 py-4 sm:px-8 sm:py-6 rounded-lg flex flex-col gap-4 sm:gap-8">
+      <h3 className="text-xl font-semibold">Таблица рейтинга</h3>
+
+      <Table className="text-sm border-separate border-spacing-y-1">
+        <TableHeader className="font-medium">
+          <TableRow className="flex items-center border-none rounded-2xl h-12">
+            <TableHead className="w-[20%] sm:w-[15%] pl-2 flex items-center">
+              Место
+            </TableHead>
+            <TableHead className="w-[50%] sm:w-[55%] flex items-center">
+              Пользователь
+            </TableHead>
+            <TableHead className="w-[30%] flex items-center justify-end">
+              Очки
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {leaderboard
+            .sort((a, b) => a.rank - b.rank)
+            .map(row => (
+              <Fragment key={row.rank}>
+                {row.user.id === user?.id && row.rank > 4 ? (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell className="w-full text-xl font-bold text-muted-foreground text-center">
+                      ...
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+                <TableRow
+                  className={`flex items-center rounded-2xl ${
+                    row.user.id === user?.id
+                      ? 'bg-primary/10 border! border-primary hover:bg-primary-subtle'
+                      : 'border border-transparent'
+                  }`}
+                >
+                  <TableCell className="w-[20%] sm:w-[15%] pl-6 font-medium">
+                    {row.rank}
+                  </TableCell>
+                  <TableCell className="w-[50%] sm:w-[55%] flex flex-col">
+                    <span className="font-semibold">
+                      {row.user.name} {row.user.id === user?.id && '(вы)'}
+                    </span>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {row.status}
+                    </span>
+                  </TableCell>
+                  <TableCell className="w-[30%] font-bold text-right">
+                    {row.points}
+                  </TableCell>
+                </TableRow>
+              </Fragment>
+            ))}
+        </TableBody>
+      </Table>
+
+      <DataRefetchContainer
+        offset={8}
+        isFetching={isFetching}
+        isError={isError}
+        refetch={() => void refetch()}
+      />
+    </div>
   );
 }
 

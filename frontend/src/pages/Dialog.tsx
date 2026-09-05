@@ -1,22 +1,47 @@
-import type { DialogLoader } from '@/loaders/dialog';
-import { Link, useLoaderData } from 'react-router';
+import { Link, useParams } from 'react-router';
 import { ChevronLeft, CircleQuestionMark, Ellipsis, X } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
-import { type DialogHistory, type DialogOption } from '@/types/dialog';
+import {
+  type DialogHistory,
+  type DialogNode,
+  type DialogOption,
+} from '@/types/dialog';
 import DialogMessage from '@/components/Dialog/DialogMessage';
-import { getDialogStep, sendDialogResults } from '@/service/dialog';
-import { useInvalidateRole } from '@/store/scenarios';
-import { useSetProfile } from '@/store/profile';
 import DialogResults from '@/components/Dialog/DialogResults';
 import { shuffleArray } from '@/utils/sorting';
+import { useQueryClient, useSuspenseQueries } from '@tanstack/react-query';
+import {
+  dialogStartQuery,
+  useDialogStepMutation,
+  useSendDialogResultsMutation,
+} from '@/queries/dialog';
+import { scenarioQuery, scenariosQuery } from '@/queries/scenarios';
+import DataRefetchContainer from '@/components/DataRefetchContainer';
+import { profileQuery } from '@/queries/profile';
+import DialogResultsSkeleton from '@/components/skeletons/DialogResultsSkeleton';
 
 const LOADING_MS = 2000;
 
 function Dialog() {
-  const invalidateRole = useInvalidateRole();
-  const setProfile = useSetProfile();
+  const queryClient = useQueryClient();
 
-  const { scenario, dialogStart } = useLoaderData<DialogLoader>();
+  const dialogStepMutation = useDialogStepMutation();
+  const sendDialogResultsMutation = useSendDialogResultsMutation();
+
+  const { scenarioId: scenarioIdRow } = useParams();
+  const scenarioId = Number(scenarioIdRow);
+
+  const [
+    { data: dialogStart },
+    {
+      data: scenario,
+      isFetching: scenarioIsFetching,
+      isError: scenarioIsError,
+      refetch: scenarioRefetch,
+    },
+  ] = useSuspenseQueries({
+    queries: [dialogStartQuery(scenarioId), scenarioQuery(scenarioId)],
+  });
 
   const [currentOptions, setCurrentOptions] = useState<DialogOption[]>(
     dialogStart.options,
@@ -29,20 +54,23 @@ function Dialog() {
   ]);
 
   const [isOpponentTyping, setIsOpponentTyping] = useState(true);
+  const [failedOption, setFailedOption] = useState<DialogOption | null>(null);
   const [modalResultsShown, setModalResultsShown] = useState(false);
   const [showDialogDescription, setShowDialogDescription] = useState(true);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Скролл к последнему сообщению в диалоге
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({
         top: scrollContainerRef.current.scrollHeight,
-        behavior: 'smooth', // Плавный скролл
+        behavior: 'smooth',
       });
     }
   }, [dialogHistory, isOpponentTyping]);
 
+  // Стартовая анимация набора сообщения оппонента
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setIsOpponentTyping(false);
@@ -51,24 +79,66 @@ function Dialog() {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  async function handleOptionChoise(option: DialogOption) {
+  async function handleDialogFinish(finalStatus: DialogNode['finalStatus']) {
+    if (finalStatus != '') {
+      try {
+        // Отображаем модальное окно результата
+        setModalResultsShown(true);
+
+        await sendDialogResultsMutation.mutateAsync({
+          scenarioId: scenario.id,
+          status: finalStatus,
+        });
+
+        // Инвалидация сценариев и профиля
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: scenariosQuery('buyer').queryKey,
+          }),
+          queryClient.invalidateQueries({
+            queryKey: scenariosQuery('seller').queryKey,
+          }),
+          queryClient.invalidateQueries({
+            queryKey: profileQuery().queryKey,
+          }),
+        ]);
+      } catch (error) {
+        console.log(
+          `Ошибка при отправке результатов сценария с ID=${scenario.id}`,
+          error,
+        );
+      }
+    }
+  }
+
+  async function handleOptionChoise(option: DialogOption, isRetry = false) {
     // Если оппонент "печатает", полностью игнорируем клики
     if (isOpponentTyping) return;
+    setIsOpponentTyping(true);
 
     const isOptionExists = currentOptions.some(opt => opt.id === option.id);
-    if (!isOptionExists) return;
+    if (!isOptionExists) {
+      setIsOpponentTyping(false);
+      return;
+    }
 
-    setDialogHistory(hist => [
-      ...hist,
-      {
-        ...option,
-        type: 'user',
-      },
-    ]);
+    if (!isRetry) {
+      setDialogHistory(hist => [
+        ...hist,
+        {
+          ...option,
+          type: 'user',
+        },
+      ]);
+    }
 
     try {
-      const nextDialogStep = await getDialogStep(scenario.id, option.id);
+      const nextDialogStep = await dialogStepMutation.mutateAsync({
+        scenarioId: scenario.id,
+        optionId: option.id,
+      });
 
+      setFailedOption(null);
       setCurrentOptions(nextDialogStep.options);
       setDialogHistory(hist => [
         ...hist,
@@ -79,36 +149,46 @@ function Dialog() {
       ]);
 
       if (!nextDialogStep.scenarioNode.isFinal) {
-        setIsOpponentTyping(true);
-        setTimeout(() => {
-          setIsOpponentTyping(false);
-        }, LOADING_MS);
+        setTimeout(() => setIsOpponentTyping(false), LOADING_MS);
       } else {
-        const finalStatus = nextDialogStep.scenarioNode.finalStatus;
-
-        if (finalStatus != '') {
-          await sendDialogResults(scenario.id, finalStatus);
-
-          // Очищаем, чтобы забрать новые данные с бэкенда
-          invalidateRole(scenario.role);
-          setProfile(null);
-
-          // Отображать модальное окно результата
-          setModalResultsShown(true);
-        }
+        setIsOpponentTyping(false);
+        void handleDialogFinish(nextDialogStep.scenarioNode.finalStatus);
       }
     } catch (error) {
+      setFailedOption(option);
+      setIsOpponentTyping(false);
       console.log(`Ошибка при выборе опции c ID=${option.id}`, error);
     }
   }
 
   return (
     <>
-      {modalResultsShown && (
-        <DialogResults scenario={scenario} history={dialogHistory} />
-      )}
+      {modalResultsShown ? (
+        <>
+          {sendDialogResultsMutation.isPending && <DialogResultsSkeleton />}
+          {sendDialogResultsMutation.isSuccess && (
+            <DialogResults scenario={scenario} history={dialogHistory} />
+          )}
+          {sendDialogResultsMutation.isError && (
+            <DialogResultsSkeleton>
+              <DataRefetchContainer
+                isError={true}
+                isFetching={false}
+                offset={8}
+                refetch={() => {
+                  const lastDialogHistoryEntry = dialogHistory.at(-1);
+
+                  if (lastDialogHistoryEntry?.type === 'opponent') {
+                    void handleDialogFinish(lastDialogHistoryEntry.finalStatus);
+                  }
+                }}
+              />
+            </DialogResultsSkeleton>
+          )}
+        </>
+      ) : null}
       <div className="h-screen flex flex-col gap-4">
-        <div className="shadow-sm">
+        <div className="relative shadow-sm">
           <div className="bg-background py-4">
             <div className="container-box flex items-center gap-4">
               <Link to="/">
@@ -144,6 +224,13 @@ function Dialog() {
               </div>
             </div>
           ) : null}
+
+          <DataRefetchContainer
+            offset={8}
+            isFetching={scenarioIsFetching}
+            isError={scenarioIsError}
+            refetch={() => void scenarioRefetch()}
+          />
         </div>
 
         <div
@@ -164,16 +251,40 @@ function Dialog() {
 
             if (isOpponent && dialogItem.isFinal) return null;
 
-            return (
+            return dialogItem.type === 'opponent' ? (
               <DialogMessage
                 key={`${dialogItem.type}${dialogItem.id}`}
                 typing={isTyping}
-                type={dialogItem.type}
+                type="opponent"
                 text={dialogItem.messageText}
+              />
+            ) : (
+              <DialogMessage
+                key={`${dialogItem.type}${dialogItem.id}`}
+                typing={isTyping}
+                type="user"
+                text={dialogItem.messageText}
+                status={isLastMessage ? dialogStepMutation.status : 'success'}
               />
             );
           })}
         </div>
+
+        {dialogStepMutation.isError && (
+          <div className="flex items-center justify-center gap-1 text-destructive">
+            <span>Ошибка при отправке сообщения.</span>
+            <button
+              className="underline cursor-pointer"
+              onClick={() => {
+                if (failedOption) {
+                  void handleOptionChoise(failedOption, true);
+                }
+              }}
+            >
+              Повторить
+            </button>
+          </div>
+        )}
 
         <div className="bg-background pt-2 sm:pt-4 pb-4 sm:pb-8">
           <div className="container-box flex flex-col gap-2 sm:gap-4 items-center">
@@ -185,8 +296,10 @@ function Dialog() {
                 {shuffleArray(currentOptions).map(option => (
                   <div
                     key={option.id}
-                    className={`transition-colors bg-muted border-border ${isOpponentTyping ? 'flex items-center justify-center text-muted-foreground' : 'hover:bg-primary/20 hover:border-primary cursor-pointer'} border rounded-lg px-4 py-3`}
-                    onClick={() => void handleOptionChoise(option)}
+                    className={`transition-colors bg-muted border-border ${isOpponentTyping ? 'flex items-center justify-center text-muted-foreground' : 'hover:bg-primary-subtle hover:border-primary cursor-pointer'} border rounded-lg px-4 py-3`}
+                    onClick={() => {
+                      if (!failedOption) void handleOptionChoise(option);
+                    }}
                   >
                     {isOpponentTyping ? (
                       <Ellipsis

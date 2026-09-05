@@ -1,25 +1,18 @@
-import type { UserProfile } from '@/types/profile';
-import { composeLoaders } from './utils';
-import {
-  leaderboardLoader,
-  scenariosLoader,
-  userProfileLoader,
-} from './loaders';
-import type { Leaderboard } from '@/types/leaderboard';
-import type { Scenario } from '@/types/scenarios';
+import type { QueryClient } from '@tanstack/react-query';
+import { profileQuery } from '@/queries/profile';
+import { scenariosQuery } from '@/queries/scenarios';
+import { leaderboardQuery } from '@/queries/leaderboard';
+import { processLoaderQueries } from '@/utils/loaders';
 
-export interface ProfileLoader {
-  profile: UserProfile;
-  leaderboard: Leaderboard[];
-  seller: Scenario<'seller'>[];
-  buyer: Scenario<'buyer'>[];
-}
+export function profileLoader(queryClient: QueryClient) {
+  return async () => {
+    const critical = [
+      queryClient.ensureQueryData(scenariosQuery<'buyer'>('buyer')),
+      queryClient.ensureQueryData(scenariosQuery<'seller'>('seller')),
+      queryClient.ensureQueryData(profileQuery()),
+    ];
+    const nonCritical = [queryClient.ensureQueryData(leaderboardQuery())];
 
-export async function profileLoader(): Promise<ProfileLoader> {
-  return composeLoaders({
-    profile: userProfileLoader,
-    leaderboard: leaderboardLoader,
-    buyer: () => scenariosLoader('buyer'),
-    seller: () => scenariosLoader('seller'),
-  });
+    await processLoaderQueries(critical, nonCritical);
+  };
 }

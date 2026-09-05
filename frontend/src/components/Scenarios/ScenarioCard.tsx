@@ -1,12 +1,6 @@
 import type { Scenario } from '@/types/scenarios';
-import {
-  CircleStar,
-  ArrowRight,
-  Ban,
-  Store,
-  ShoppingCart,
-} from 'lucide-react';
-import { DynamicIcon, type IconName } from 'lucide-react/dynamic'; 
+import { CircleStar, ArrowRight, Ban, Store, ShoppingCart } from 'lucide-react';
+import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { Button } from '../ui/button';
 import { Link } from 'react-router';
 import IconInCircle from '../IconInCircle';
@@ -37,14 +31,20 @@ function ScenarioCard({ scenario }: ScenarioCardProps) {
               <DynamicIcon
                 name={scenario.icon as IconName}
                 className="text-primary"
-                fallback={() => scenario.role === 'seller' ? <ShoppingCart /> : <Store />}
+                fallback={() =>
+                  scenario.role === 'seller' ? (
+                    <ShoppingCart className="text-primary-subtle" />
+                  ) : (
+                    <Store className="text-primary-subtle" />
+                  )
+                }
               />
             ) : (
               <Ban />
             )
           }
           variants="lg"
-          backgroundColor={available ? 'bg-primary/20' : 'bg-muted'}
+          backgroundColor={available ? 'bg-primary-subtle' : 'bg-muted'}
         />
         <span className="inline-block rounded-lg border-border border-2 bg-background text-sm font-medium px-2.5 py-0.5">
           {scenario.difficulty === 'easy' ? 'Лёгкий' : 'Сложный'}
